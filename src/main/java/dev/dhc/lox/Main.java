@@ -1,3 +1,5 @@
+package dev.dhc.lox;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,12 +30,10 @@ public class Main {
       System.exit(1);
     }
 
-    // Uncomment this block to pass the first stage
-    // 
-    // if (fileContents.length() > 0) {
-    //   throw new RuntimeException("Scanner not implemented");
-    // } else {
-    //   System.out.println("EOF  null"); // Placeholder, remove this line when implementing the scanner
-    // }
+    if (fileContents.isEmpty()) {
+      System.out.println("EOF  null"); // Placeholder, remove this line when implementing the scanner
+    } else {
+      throw new RuntimeException("Scanner not implemented");
+    }
   }
 }

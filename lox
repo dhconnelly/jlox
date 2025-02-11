@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -e
+
+mvn clean
+
+(
+  cd "$(dirname "$0")" # Ensure compile steps are run within the repository directory
+  mvn -B package -Ddir=./target/
+)
+
+exec java -jar ./target/lox.jar "$@"

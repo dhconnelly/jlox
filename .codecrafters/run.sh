@@ -8,4 +8,4 @@
 
 set -e # Exit on failure
 
-exec java -jar /tmp/codecrafters-build-interpreter-java/codecrafters-interpreter.jar "$@"
+exec java -jar /tmp/codecrafters-build-interpreter-java/lox.jar "$@"
