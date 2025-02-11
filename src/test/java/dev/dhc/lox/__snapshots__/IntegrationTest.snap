@@ -1,0 +1,16 @@
+dev.dhc.lox.IntegrationTest.testScanner[empty.lox]=[
+  {
+    "exit": "OK",
+    "out": "",
+    "err": ""
+  }
+]
+
+
+dev.dhc.lox.IntegrationTest.testScanner[test.lox]=[
+  {
+    "exit": "OK",
+    "out": "",
+    "err": ""
+  }
+]
