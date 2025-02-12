@@ -4,8 +4,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import au.com.origin.snapshots.Expect;
 import au.com.origin.snapshots.junit5.SnapshotExtension;
-import dev.dhc.lox.Main.Command;
-import dev.dhc.lox.Main.ExitCode;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.List;
@@ -15,9 +13,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 @ExtendWith({SnapshotExtension.class})
 public class IntegrationTest {
-  private record Result(ExitCode exit, String out, String err) {}
+  private record Result(int code, String out, String err) {}
 
-  private Result execute(Command command, String resourceName) {
+  private Result execute(String command, String resourceName) {
     final var out = new ByteArrayOutputStream();
     final var err = new ByteArrayOutputStream();
     final var main = new Main(new PrintStream(out), new PrintStream(err));
@@ -35,6 +33,6 @@ public class IntegrationTest {
   @ParameterizedTest
   @MethodSource("testResources")
   void testScanner(String resourceName) {
-      expect.scenario(resourceName).toMatchSnapshot(execute(Command.TOKENIZE, resourceName));
+      expect.scenario(resourceName).toMatchSnapshot(execute("tokenize", resourceName));
   }
 }

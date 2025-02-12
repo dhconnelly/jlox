@@ -1,7 +1,7 @@
 dev.dhc.lox.IntegrationTest.testScanner[empty.lox]=[
   {
-    "exit": "OK",
-    "out": "",
+    "code": 0,
+    "out": "EOF  null\n",
     "err": ""
   }
 ]
@@ -9,8 +9,8 @@ dev.dhc.lox.IntegrationTest.testScanner[empty.lox]=[
 
 dev.dhc.lox.IntegrationTest.testScanner[test.lox]=[
   {
-    "exit": "OK",
-    "out": "",
+    "code": 0,
+    "out": "EOF  null\n",
     "err": ""
   }
 ]
