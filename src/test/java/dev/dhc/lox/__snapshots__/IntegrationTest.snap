@@ -1,16 +1,53 @@
 dev.dhc.lox.IntegrationTest.testScanner[empty.lox]=[
   {
     "code": 0,
-    "out": "EOF  null\n",
-    "err": ""
+    "outLines": [
+      "EOF  null"
+    ],
+    "errLines": [ ]
+  }
+]
+
+
+dev.dhc.lox.IntegrationTest.testScanner[parens.lox]=[
+  {
+    "code": 0,
+    "outLines": [
+      "LEFT_PAREN ( null",
+      "LEFT_PAREN ( null",
+      "RIGHT_PAREN ) null",
+      "EOF  null"
+    ],
+    "errLines": [ ]
   }
 ]
 
 
 dev.dhc.lox.IntegrationTest.testScanner[test.lox]=[
   {
-    "code": 0,
-    "out": "EOF  null\n",
-    "err": ""
+    "code": 65,
+    "outLines": [
+      "EOF  null"
+    ],
+    "errLines": [
+      "[line 1] Error: Unexpected character.",
+      "[line 1] Error: Unexpected character.",
+      "[line 1] Error: Unexpected character.",
+      "[line 1] Error: Unexpected character.",
+      "[line 1] Error: Unexpected character.",
+      "[line 1] Error: Unexpected character.",
+      "[line 1] Error: Unexpected character.",
+      "[line 1] Error: Unexpected character.",
+      "[line 1] Error: Unexpected character.",
+      "[line 1] Error: Unexpected character.",
+      "[line 1] Error: Unexpected character.",
+      "[line 1] Error: Unexpected character.",
+      "[line 1] Error: Unexpected character.",
+      "[line 1] Error: Unexpected character.",
+      "[line 1] Error: Unexpected character.",
+      "[line 1] Error: Unexpected character.",
+      "[line 1] Error: Unexpected character.",
+      "[line 1] Error: Unexpected character."
+    ]
   }
 ]

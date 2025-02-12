@@ -4,6 +4,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import au.com.origin.snapshots.Expect;
 import au.com.origin.snapshots.junit5.SnapshotExtension;
+import dev.dhc.lox.Main.Environment;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,19 +19,22 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 @ExtendWith({SnapshotExtension.class})
 public class IntegrationTest {
-  private record Result(int code, String out, String err) {}
+  private record Result(int code, List<String> outLines, List<String> errLines) {}
 
   private Result execute(String... args) throws IOException {
     final var in = new ByteArrayInputStream(new byte[]{});
     final var out = new ByteArrayOutputStream();
     final var err = new ByteArrayOutputStream();
-    final var main = new Main(in, out, err);
-    final var exit = main.run(args);
-    return new Result(exit, out.toString(UTF_8), err.toString(UTF_8));
+    final var exit = Main.run(
+        new Environment(in, new PrintStream(out), new PrintStream(err)), args);
+    return new Result(
+        exit,
+        out.toString(UTF_8).lines().toList(),
+        err.toString(UTF_8).lines().toList());
   }
 
   private static List<String> testResources() {
-    return List.of("test.lox", "empty.lox");
+    return List.of("test.lox", "empty.lox", "parens.lox");
   }
 
   private String resourcePath(String resource) {
