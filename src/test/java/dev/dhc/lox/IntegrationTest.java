@@ -34,7 +34,7 @@ public class IntegrationTest {
   }
 
   private static List<String> testResources() {
-    return List.of("test.lox", "empty.lox", "parens.lox");
+    return List.of("test.lox", "empty.lox", "tokens.lox");
   }
 
   private String resourcePath(String resource) {

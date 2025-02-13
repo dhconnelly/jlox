@@ -69,10 +69,21 @@ public class Scanner {
       switch (c) {
         case '(' -> emit(Type.LEFT_PAREN);
         case ')' -> emit(Type.RIGHT_PAREN);
-        case ' ', '\t' -> {}
-        case '\n' -> line++;
+        case '{' -> emit(Type.LEFT_BRACE);
+        case '}' -> emit(Type.RIGHT_BRACE);
+        case '.' -> emit(Type.DOT);
+        case ',' -> emit(Type.COMMA);
+        case ';' -> emit(Type.SEMICOLON);
+        case '+' -> emit(Type.PLUS);
+        case '-' -> emit(Type.MINUS);
+        case '*' -> emit(Type.STAR);
+        case ' ', '\t', '\n' -> {
+          if (c == '\n') line++;
+          continue;
+        }
         default -> error("Unexpected character.");
       }
+      break;
     }
   }
 }

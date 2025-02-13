@@ -9,24 +9,11 @@ dev.dhc.lox.IntegrationTest.testScanner[empty.lox]=[
 ]
 
 
-dev.dhc.lox.IntegrationTest.testScanner[parens.lox]=[
-  {
-    "code": 0,
-    "outLines": [
-      "LEFT_PAREN ( null",
-      "LEFT_PAREN ( null",
-      "RIGHT_PAREN ) null",
-      "EOF  null"
-    ],
-    "errLines": [ ]
-  }
-]
-
-
 dev.dhc.lox.IntegrationTest.testScanner[test.lox]=[
   {
     "code": 65,
     "outLines": [
+      "SEMICOLON ; null",
       "EOF  null"
     ],
     "errLines": [
@@ -46,8 +33,38 @@ dev.dhc.lox.IntegrationTest.testScanner[test.lox]=[
       "[line 1] Error: Unexpected character.",
       "[line 1] Error: Unexpected character.",
       "[line 1] Error: Unexpected character.",
-      "[line 1] Error: Unexpected character.",
       "[line 1] Error: Unexpected character."
     ]
+  }
+]
+
+
+dev.dhc.lox.IntegrationTest.testScanner[tokens.lox]=[
+  {
+    "code": 0,
+    "outLines": [
+      "LEFT_PAREN ( null",
+      "LEFT_PAREN ( null",
+      "RIGHT_PAREN ) null",
+      "LEFT_BRACE { null",
+      "LEFT_BRACE { null",
+      "LEFT_BRACE { null",
+      "RIGHT_BRACE } null",
+      "RIGHT_BRACE } null",
+      "LEFT_BRACE { null",
+      "RIGHT_BRACE } null",
+      "LEFT_BRACE { null",
+      "LEFT_BRACE { null",
+      "LEFT_BRACE { null",
+      "RIGHT_BRACE } null",
+      "COMMA , null",
+      "DOT . null",
+      "MINUS - null",
+      "PLUS + null",
+      "SEMICOLON ; null",
+      "STAR * null",
+      "EOF  null"
+    ],
+    "errLines": [ ]
   }
 ]
