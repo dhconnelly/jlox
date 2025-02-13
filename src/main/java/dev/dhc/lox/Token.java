@@ -31,6 +31,10 @@ public record Token(
   }
 
   public sealed interface Literal {}
-  public record StringLiteral(String value) implements Literal {}
-  public record NumberLiteral(double value) implements Literal {}
+  public record StringLiteral(String value) implements Literal {
+    @Override public String toString() { return value; }
+  }
+  public record NumberLiteral(double value) implements Literal {
+    @Override public String toString() { return Double.toString(value); }
+  }
 }

@@ -1,5 +1,7 @@
 package dev.dhc.lox;
 
+import dev.dhc.lox.Token.Literal;
+import dev.dhc.lox.Token.StringLiteral;
 import dev.dhc.lox.Token.Type;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -50,14 +52,6 @@ public class Scanner {
     return peek(0) == -1;
   }
 
-  private boolean peekIs(int... want) throws IOException {
-    int c = peek(0);
-    for (int wanted : want) {
-      if (c == wanted) return true;
-    }
-    return false;
-  }
-
   private char advance() throws IOException, LoxError {
     int c = reader.read();
     if (c == -1) error("Unexpected eof.");
@@ -65,23 +59,34 @@ public class Scanner {
     return (char)c;
   }
 
-  private void eat(char want) throws LoxError, IOException {
-    char got = advance();
-    if (got != want) {
-      error(String.format("Wanted %c, got %c.", want, got));
-    }
+  private void eat(char want, String orError) throws LoxError, IOException {
+    int got = peek(0);
+    if (got != want) error(orError);
+    advance();
   }
 
   private boolean maybeEat(char want) throws IOException, LoxError {
     if (peek(0) == want) {
-      eat(want);
+      advance();
       return true;
     }
     return false;
   }
 
+  private void eatUntil(char want) throws IOException, LoxError {
+    while (true) {
+      int c = peek(0);
+      if (c == -1 || c == want) break;
+      advance();
+    }
+  }
+
   private void emit(Type type) {
     lookahead.add(new Token(line, type, current.toString(), Optional.empty()));
+  }
+
+  private void emit(Type type, Literal literal) {
+    lookahead.add(new Token(line, type, current.toString(), Optional.of(literal)));
   }
 
   private void error(String message) throws LoxError {
@@ -103,58 +108,32 @@ public class Scanner {
         case '+' -> emit(Type.PLUS);
         case '-' -> emit(Type.MINUS);
         case '*' -> emit(Type.STAR);
+        case '=' -> emit(maybeEat('=') ? Type.EQUAL_EQUAL : Type.EQUAL);
+        case '!' -> emit(maybeEat('=') ? Type.BANG_EQUAL : Type.BANG);
+        case '<' -> emit(maybeEat('=') ? Type.LESS_EQUAL : Type.LESS);
+        case '>' -> emit(maybeEat('=') ? Type.GREATER_EQUAL : Type.GREATER);
 
-        case '=' -> {
-          if (maybeEat('=')) {
-            emit(Type.EQUAL_EQUAL);
-          } else {
-            emit(Type.EQUAL);
-          }
-        }
-        case '!' -> {
-          if (maybeEat('=')) {
-            emit(Type.BANG_EQUAL);
-          } else {
-            emit(Type.BANG);
-          }
-        }
-        case '<' -> {
-          if (maybeEat('=')) {
-            emit(Type.LESS_EQUAL);
-          } else {
-            emit(Type.LESS);
-          }
-        }
-        case '>' -> {
-          if (maybeEat('=')) {
-            emit(Type.GREATER_EQUAL);
-          } else {
-            emit(Type.GREATER);
-          }
-        }
         case '/' -> {
           if (maybeEat('/')) {
-            while (!peekIs(-1, '\n')) {
-              advance();
-            }
+            eatUntil('\n');
             continue;
           } else {
             emit(Type.SLASH);
           }
         }
-        /*
+
         case '"' -> {
-          while (!peekIs(-1, '"')) {
-            advance();
-          }
-          eat('"');
-          emit(Type.STRING);
+          eatUntil('"');
+          eat('"', "Unterminated string.");
+          final var literal = new StringLiteral(current.substring(1, current.length()-1));
+          emit(Type.STRING, literal);
         }
-         */
+
         case ' ', '\t', '\n' -> {
           if (c == '\n') line++;
           continue;
         }
+
         default -> error(String.format("Unexpected character: %c", c));
       }
       break;
