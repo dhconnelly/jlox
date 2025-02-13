@@ -77,6 +77,38 @@ public class Scanner {
         case '+' -> emit(Type.PLUS);
         case '-' -> emit(Type.MINUS);
         case '*' -> emit(Type.STAR);
+        case '=' -> {
+          if (peek(0) == '=') {
+            advance();
+            emit(Type.EQUAL_EQUAL);
+          } else {
+            emit(Type.EQUAL);
+          }
+        }
+        case '!' -> {
+          if (peek(0) == '=') {
+            advance();
+            emit(Type.BANG_EQUAL);
+          } else {
+            emit(Type.BANG);
+          }
+        }
+        case '<' -> {
+          if (peek(0) == '=') {
+            advance();
+            emit(Type.LESS_EQUAL);
+          } else {
+            emit(Type.LESS);
+          }
+        }
+        case '>' -> {
+          if (peek(0) == '=') {
+            advance();
+            emit(Type.GREATER_EQUAL);
+          } else {
+            emit(Type.GREATER);
+          }
+        }
         case ' ', '\t', '\n' -> {
           if (c == '\n') line++;
           continue;
