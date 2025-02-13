@@ -79,6 +79,8 @@ dev.dhc.lox.IntegrationTest.testScanner[tokens.lox]=[
       "LESS_EQUAL <= null",
       "GREATER_EQUAL >= null",
       "EQUAL = null",
+      "SLASH / null",
+      "SLASH / null",
       "EOF  null"
     ],
     "errLines": [ ]

@@ -109,6 +109,16 @@ public class Scanner {
             emit(Type.GREATER);
           }
         }
+        case '/' -> {
+          if (peek(0) == '/') {
+            while (advance() != '\n') {
+              // eat the comment
+            }
+            continue;
+          } else {
+            emit(Type.SLASH);
+          }
+        }
         case ' ', '\t', '\n' -> {
           if (c == '\n') line++;
           continue;
