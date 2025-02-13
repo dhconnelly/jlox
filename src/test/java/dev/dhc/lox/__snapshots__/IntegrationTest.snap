@@ -14,7 +14,7 @@ dev.dhc.lox.IntegrationTest.testParser[inputs/parser/expressions.lox]=[
       "true",
       "false",
       "123.45",
-      "\"foo bar baz\"",
+      "foo bar baz",
       "nil"
     ],
     "errLines": [ ]

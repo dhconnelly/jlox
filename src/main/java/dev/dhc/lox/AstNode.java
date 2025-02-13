@@ -14,6 +14,6 @@ public interface AstNode {
     @Override public String toString() { return Double.toString(value); }
   }
   record StrExpr(int line, String value) implements Expr {
-    @Override public String toString() { return String.format("\"%s\"", value); }
+    @Override public String toString() { return value; }
   }
 }
