@@ -33,7 +33,19 @@ public interface AstNode {
   record StrExpr(int line, String value) implements Expr {
     @Override public String toString() { return value; }
   }
-  record BinaryExpr(int line, Expr left, BinOp op, Expr right) implements Expr {}
-  record UnaryExpr(int line, UnaryOp op, Expr expr) implements Expr {}
-  record Grouping(int line, Expr expr) implements Expr {}
+  record BinaryExpr(int line, Expr left, BinOp op, Expr right) implements Expr {
+    @Override public String toString() {
+      return String.format("(%s %s %s)", op.s, left, right);
+    }
+  }
+  record UnaryExpr(int line, UnaryOp op, Expr expr) implements Expr {
+    @Override public String toString() {
+      return String.format("(%s %s)", op.s, expr);
+    }
+  }
+  record Grouping(int line, Expr expr) implements Expr {
+    @Override public String toString() {
+      return String.format("(group %s)", expr);
+    }
+  }
 }
