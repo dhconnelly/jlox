@@ -3,3 +3,9 @@ false
 123.45
 "foo bar baz"
 nil
+("foo")
+!true
+16 * 38 / 58
+52 + 80 - 94
+83 < 99 < 115
+"baz" == "baz"

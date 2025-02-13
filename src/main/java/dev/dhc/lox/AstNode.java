@@ -3,6 +3,23 @@ package dev.dhc.lox;
 public interface AstNode {
   int line();
 
+  enum BinOp {
+    BANG_EQUAL("!="), EQUAL_EQUAL("=="),
+    PLUS("+"), MINUS("-"), SLASH("/"), STAR("*"),
+    GREATER(">"), GREATER_EQUAL(">="),
+    LESS("<"), LESS_EQUAL("<=");
+
+    private final String s;
+    BinOp(String s) { this.s = s; }
+  }
+
+  enum UnaryOp {
+    BANG("!"), MINUS("-");
+
+    private final String s;
+    UnaryOp(String s) { this.s = s; }
+  }
+
   sealed interface Expr extends AstNode {}
   record NilExpr(int line) implements Expr {
     @Override public String toString() { return "nil"; }
@@ -16,4 +33,7 @@ public interface AstNode {
   record StrExpr(int line, String value) implements Expr {
     @Override public String toString() { return value; }
   }
+  record BinaryExpr(int line, Expr left, BinOp op, Expr right) implements Expr {}
+  record UnaryExpr(int line, UnaryOp op, Expr expr) implements Expr {}
+  record Grouping(int line, Expr expr) implements Expr {}
 }

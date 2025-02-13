@@ -58,7 +58,7 @@ public class Scanner {
     return (char)c;
   }
 
-  private void eat(char want, String orError) throws LoxError, IOException {
+  private void eat(char want, String orError) throws IOException {
     int got = peek(0);
     if (got != want) error(orError);
     advance();
@@ -77,7 +77,7 @@ public class Scanner {
     return maybeEat(c -> c == want);
   }
 
-  private void eatWhile(Predicate<Character> p) throws LoxError, IOException {
+  private void eatWhile(Predicate<Character> p) throws IOException {
     while (maybeEat(p)) {
       // eat
     }
@@ -99,7 +99,7 @@ public class Scanner {
     lookahead.add(new Token(line, type, current.toString(), Optional.of(literal)));
   }
 
-  private void error(String message) throws LoxError {
+  private void error(String message) {
     throw new LoxError(line, message);
   }
 

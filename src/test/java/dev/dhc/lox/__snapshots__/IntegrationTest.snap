@@ -15,7 +15,13 @@ dev.dhc.lox.IntegrationTest.testParser[inputs/parser/expressions.lox]=[
       "false",
       "123.45",
       "foo bar baz",
-      "nil"
+      "nil",
+      "Grouping[line=6, expr=foo]",
+      "UnaryExpr[line=7, op=BANG, expr=true]",
+      "BinaryExpr[line=8, left=BinaryExpr[line=8, left=16.0, op=STAR, right=38.0], op=SLASH, right=58.0]",
+      "BinaryExpr[line=9, left=BinaryExpr[line=9, left=52.0, op=PLUS, right=80.0], op=MINUS, right=94.0]",
+      "BinaryExpr[line=10, left=BinaryExpr[line=10, left=83.0, op=LESS, right=99.0], op=LESS, right=115.0]",
+      "BinaryExpr[line=11, left=baz, op=EQUAL_EQUAL, right=baz]"
     ],
     "errLines": [ ]
   }
