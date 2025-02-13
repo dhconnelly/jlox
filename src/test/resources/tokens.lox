@@ -18,3 +18,6 @@
 
 "" "foo" "foo bar baz" "123.45"
 1 1.2 123.45 0 0.0
+foo bar baz
+and or andor
+class else false fun for if nil print return super this true var while

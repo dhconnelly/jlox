@@ -9,10 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Deque;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 
 public class Scanner {
@@ -105,6 +103,40 @@ public class Scanner {
     throw new LoxError(line, message);
   }
 
+  private boolean isDigit(int c) {
+    return c >= '0' && c <= '9';
+  }
+
+  private boolean isAlpha(int c) {
+    return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_';
+  }
+
+  private boolean isAlphaNumeric(int c) {
+    return isDigit(c) || isAlpha(c);
+  }
+
+  private Type resolveType(String identifier) {
+    return switch (identifier) {
+      case "and" -> Type.AND;
+      case "or" -> Type.OR;
+      case "class" -> Type.CLASS;
+      case "else" -> Type.ELSE;
+      case "false" -> Type.FALSE;
+      case "fun" -> Type.FUN;
+      case "for" -> Type.FOR;
+      case "if" -> Type.IF;
+      case "nil" -> Type.NIL;
+      case "print" -> Type.PRINT;
+      case "return" -> Type.RETURN;
+      case "super" -> Type.SUPER;
+      case "this" -> Type.THIS;
+      case "true" -> Type.TRUE;
+      case "var" -> Type.VAR;
+      case "while" -> Type.WHILE;
+      default -> Type.IDENTIFIER;
+    };
+  }
+
   private void scan() throws IOException, LoxError {
     while (!isEof()) {
       current.setLength(0);
@@ -147,13 +179,16 @@ public class Scanner {
         }
 
         default -> {
-          if (Character.isDigit(c)) {
-            eatWhile(Character::isDigit);
-            if (peek(0) == '.' && Character.isDigit(peek(1))) {
+          if (isDigit(c)) {
+            eatWhile(this::isDigit);
+            if (peek(0) == '.' && isDigit(peek(1))) {
               advance();
-              eatWhile(Character::isDigit);
+              eatWhile(this::isDigit);
             }
             emit(Type.NUMBER, new NumberLiteral(Double.parseDouble(current.toString())));
+          } else if (isAlpha(c)) {
+            eatWhile(this::isAlphaNumeric);
+            emit(resolveType(current.toString()));
           } else {
             error(String.format("Unexpected character: %c", c));
           }

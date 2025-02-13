@@ -25,26 +25,16 @@ dev.dhc.lox.IntegrationTest.testScanner[scanner_errors.lox]=[
 
 dev.dhc.lox.IntegrationTest.testScanner[test.lox]=[
   {
-    "code": 65,
+    "code": 0,
     "outLines": [
+      "VAR var null",
+      "IDENTIFIER language null",
       "EQUAL = null",
       "STRING \"lox\" lox",
       "SEMICOLON ; null",
       "EOF  null"
     ],
-    "errLines": [
-      "[line 1] Error: Unexpected character: v",
-      "[line 1] Error: Unexpected character: a",
-      "[line 1] Error: Unexpected character: r",
-      "[line 1] Error: Unexpected character: l",
-      "[line 1] Error: Unexpected character: a",
-      "[line 1] Error: Unexpected character: n",
-      "[line 1] Error: Unexpected character: g",
-      "[line 1] Error: Unexpected character: u",
-      "[line 1] Error: Unexpected character: a",
-      "[line 1] Error: Unexpected character: g",
-      "[line 1] Error: Unexpected character: e"
-    ]
+    "errLines": [ ]
   }
 ]
 
@@ -100,6 +90,26 @@ dev.dhc.lox.IntegrationTest.testScanner[tokens.lox]=[
       "NUMBER 123.45 123.45",
       "NUMBER 0 0.0",
       "NUMBER 0.0 0.0",
+      "IDENTIFIER foo null",
+      "IDENTIFIER bar null",
+      "IDENTIFIER baz null",
+      "AND and null",
+      "OR or null",
+      "IDENTIFIER andor null",
+      "CLASS class null",
+      "ELSE else null",
+      "FALSE false null",
+      "FUN fun null",
+      "FOR for null",
+      "IF if null",
+      "NIL nil null",
+      "PRINT print null",
+      "RETURN return null",
+      "SUPER super null",
+      "THIS this null",
+      "TRUE true null",
+      "VAR var null",
+      "WHILE while null",
       "EOF  null"
     ],
     "errLines": [ ]
