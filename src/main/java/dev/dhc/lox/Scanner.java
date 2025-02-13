@@ -111,8 +111,10 @@ public class Scanner {
         }
         case '/' -> {
           if (peek(0) == '/') {
-            while (advance() != '\n') {
-              // eat the comment
+            while (true) {
+              int next = peek(0);
+              if (next == -1 || next == '\n') break;
+              advance();
             }
             continue;
           } else {
