@@ -30,11 +30,16 @@ public record Token(
     EOF
   }
 
-  public sealed interface Literal {}
-  public record StringLiteral(String value) implements Literal {
-    @Override public String toString() { return value; }
+  public sealed interface Literal<Type> {
+    default double asNumber() { throw new AssertionError("not a number"); }
+    default String asString() { throw new AssertionError("not a string"); }
   }
-  public record NumberLiteral(double value) implements Literal {
+  public record StringLiteral(String value) implements Literal<String> {
+    @Override public String toString() { return value; }
+    @Override public String asString() { return value; }
+  }
+  public record NumberLiteral(double value) implements Literal<Double> {
     @Override public String toString() { return Double.toString(value); }
+    @Override public double asNumber() { return value; }
   }
 }

@@ -1,4 +1,48 @@
-dev.dhc.lox.IntegrationTest.testScanner[empty.lox]=[
+dev.dhc.lox.IntegrationTest.testParser[inputs/parser/empty.lox]=[
+  {
+    "code": 0,
+    "outLines": [ ],
+    "errLines": [ ]
+  }
+]
+
+
+dev.dhc.lox.IntegrationTest.testParser[inputs/parser/expressions.lox]=[
+  {
+    "code": 0,
+    "outLines": [
+      "true",
+      "false",
+      "123.45",
+      "\"foo bar baz\"",
+      "nil"
+    ],
+    "errLines": [ ]
+  }
+]
+
+
+dev.dhc.lox.IntegrationTest.testParser[inputs/parser/parser_errors.lox]=[
+  {
+    "code": 0,
+    "outLines": [ ],
+    "errLines": [ ]
+  }
+]
+
+
+dev.dhc.lox.IntegrationTest.testParser[inputs/parser/test.lox]=[
+  {
+    "code": 65,
+    "outLines": [ ],
+    "errLines": [
+      "[line 1] Error: Expect expression."
+    ]
+  }
+]
+
+
+dev.dhc.lox.IntegrationTest.testScanner[inputs/scanner/empty.lox]=[
   {
     "code": 0,
     "outLines": [
@@ -9,7 +53,7 @@ dev.dhc.lox.IntegrationTest.testScanner[empty.lox]=[
 ]
 
 
-dev.dhc.lox.IntegrationTest.testScanner[scanner_errors.lox]=[
+dev.dhc.lox.IntegrationTest.testScanner[inputs/scanner/scanner_errors.lox]=[
   {
     "code": 65,
     "outLines": [
@@ -23,7 +67,7 @@ dev.dhc.lox.IntegrationTest.testScanner[scanner_errors.lox]=[
 ]
 
 
-dev.dhc.lox.IntegrationTest.testScanner[test.lox]=[
+dev.dhc.lox.IntegrationTest.testScanner[inputs/scanner/test.lox]=[
   {
     "code": 0,
     "outLines": [
@@ -39,7 +83,7 @@ dev.dhc.lox.IntegrationTest.testScanner[test.lox]=[
 ]
 
 
-dev.dhc.lox.IntegrationTest.testScanner[tokens.lox]=[
+dev.dhc.lox.IntegrationTest.testScanner[inputs/scanner/tokens.lox]=[
   {
     "code": 0,
     "outLines": [

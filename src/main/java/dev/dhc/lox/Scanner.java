@@ -27,14 +27,14 @@ public class Scanner {
     return new Token(line, Type.EOF, "", Optional.empty());
   }
 
-  public Token nextToken() throws IOException, LoxError {
+  public Token nextToken() throws IOException {
     if (lookahead.isEmpty()) scan();
     final var token = lookahead.pollFirst();
     return token != null ? token : eofToken();
   }
 
   // note: O(n)
-  public Token peekToken(int n) throws IOException, LoxError {
+  public Token peekToken(int n) throws IOException {
     for (int i = lookahead.size(); i <= n; i++) scan();
     return lookahead.stream().skip(n).findFirst().orElseGet(this::eofToken);
   }
@@ -51,7 +51,7 @@ public class Scanner {
     return peek(0) == -1;
   }
 
-  private char advance() throws IOException, LoxError {
+  private char advance() throws IOException {
     int c = reader.read();
     if (c == -1) error("Unexpected eof.");
     current.append((char)c);
@@ -64,7 +64,7 @@ public class Scanner {
     advance();
   }
 
-  private boolean maybeEat(Predicate<Character> p) throws IOException, LoxError {
+  private boolean maybeEat(Predicate<Character> p) throws IOException {
     int c = peek(0);
     if (c != -1 && p.test((char) c)) {
       advance();
@@ -73,7 +73,7 @@ public class Scanner {
     return false;
   }
 
-  private boolean maybeEat(char want) throws IOException, LoxError {
+  private boolean maybeEat(char want) throws IOException {
     return maybeEat(c -> c == want);
   }
 
@@ -83,7 +83,7 @@ public class Scanner {
     }
   }
 
-  private void eatUntil(char want) throws IOException, LoxError {
+  private void eatUntil(char want) throws IOException {
     while (true) {
       int c = peek(0);
       if (c == -1 || c == want) break;
@@ -137,7 +137,7 @@ public class Scanner {
     };
   }
 
-  private void scan() throws IOException, LoxError {
+  private void scan() throws IOException {
     while (!isEof()) {
       current.setLength(0);
       char c = advance();

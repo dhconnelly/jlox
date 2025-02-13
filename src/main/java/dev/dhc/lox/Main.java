@@ -44,6 +44,26 @@ public class Main {
         return hadError ? 65 : 0;
       }
 
+      case "parse" -> {
+        if (args.length != 2) {
+          env.err.println("usage: lox parse FILE");
+          return 64;
+        }
+        final var in = Files.newInputStream(Paths.get(args[1]));
+        final var scanner = new Scanner(in);
+        final var parser = new Parser(scanner);
+        try {
+          while (!parser.eof()) {
+            final var expr = parser.expr();
+            env.out.println(expr);
+          }
+          return 0;
+        } catch (LoxError e) {
+          env.err.println(e.getMessage());
+          return 65;
+        }
+      }
+
       case "repl" -> {
         final var reader = new BufferedReader(new InputStreamReader(env.in));
         boolean hadError = false;
@@ -52,11 +72,11 @@ public class Main {
           final var line = reader.readLine();
           if (line == null) break;
           final var scanner = new Scanner(new ByteArrayInputStream(line.getBytes(UTF_8)));
+          final var parser = new Parser(scanner);
           try {
-            while (true) {
-              final var token = scanner.nextToken();
-              env.out.println(token);
-              if (token.type() == Type.EOF) break;
+            while (!parser.eof()) {
+              final var expr = parser.expr();
+              env.out.println(expr);
             }
           } catch (LoxError e) {
             env.err.println(e.getMessage());
@@ -73,11 +93,11 @@ public class Main {
         }
         final var in = Files.newInputStream(Paths.get(args[1]));
         final var scanner = new Scanner(in);
+        final var parser = new Parser(scanner);
         try {
-          while (true) {
-            final var token = scanner.nextToken();
-            env.out.println(token);
-            if (token.type() == Type.EOF) break;
+          while (!parser.eof()) {
+            final var expr = parser.expr();
+            env.out.println(expr);
           }
         } catch (LoxError e) {
           env.err.println(e.getMessage());
