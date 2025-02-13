@@ -95,6 +95,11 @@ dev.dhc.lox.IntegrationTest.testScanner[tokens.lox]=[
       "STRING \"foo\" foo",
       "STRING \"foo bar baz\" foo bar baz",
       "STRING \"123.45\" 123.45",
+      "NUMBER 1 1.0",
+      "NUMBER 1.2 1.2",
+      "NUMBER 123.45 123.45",
+      "NUMBER 0 0.0",
+      "NUMBER 0.0 0.0",
       "EOF  null"
     ],
     "errLines": [ ]

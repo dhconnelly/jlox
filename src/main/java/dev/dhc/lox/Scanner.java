@@ -1,6 +1,7 @@
 package dev.dhc.lox;
 
 import dev.dhc.lox.Token.Literal;
+import dev.dhc.lox.Token.NumberLiteral;
 import dev.dhc.lox.Token.StringLiteral;
 import dev.dhc.lox.Token.Type;
 import java.io.BufferedReader;
@@ -65,12 +66,23 @@ public class Scanner {
     advance();
   }
 
-  private boolean maybeEat(char want) throws IOException, LoxError {
-    if (peek(0) == want) {
+  private boolean maybeEat(Predicate<Character> p) throws IOException, LoxError {
+    int c = peek(0);
+    if (c != -1 && p.test((char) c)) {
       advance();
       return true;
     }
     return false;
+  }
+
+  private boolean maybeEat(char want) throws IOException, LoxError {
+    return maybeEat(c -> c == want);
+  }
+
+  private void eatWhile(Predicate<Character> p) throws LoxError, IOException {
+    while (maybeEat(p)) {
+      // eat
+    }
   }
 
   private void eatUntil(char want) throws IOException, LoxError {
@@ -134,7 +146,18 @@ public class Scanner {
           continue;
         }
 
-        default -> error(String.format("Unexpected character: %c", c));
+        default -> {
+          if (Character.isDigit(c)) {
+            eatWhile(Character::isDigit);
+            if (peek(0) == '.' && Character.isDigit(peek(1))) {
+              advance();
+              eatWhile(Character::isDigit);
+            }
+            emit(Type.NUMBER, new NumberLiteral(Double.parseDouble(current.toString())));
+          } else {
+            error(String.format("Unexpected character: %c", c));
+          }
+        }
       }
       break;
     }
