@@ -81,7 +81,7 @@ public class Scanner {
           if (c == '\n') line++;
           continue;
         }
-        default -> error("Unexpected character.");
+        default -> error(String.format("Unexpected character: %c", c));
       }
       break;
     }

@@ -17,23 +17,23 @@ dev.dhc.lox.IntegrationTest.testScanner[test.lox]=[
       "EOF  null"
     ],
     "errLines": [
-      "[line 1] Error: Unexpected character.",
-      "[line 1] Error: Unexpected character.",
-      "[line 1] Error: Unexpected character.",
-      "[line 1] Error: Unexpected character.",
-      "[line 1] Error: Unexpected character.",
-      "[line 1] Error: Unexpected character.",
-      "[line 1] Error: Unexpected character.",
-      "[line 1] Error: Unexpected character.",
-      "[line 1] Error: Unexpected character.",
-      "[line 1] Error: Unexpected character.",
-      "[line 1] Error: Unexpected character.",
-      "[line 1] Error: Unexpected character.",
-      "[line 1] Error: Unexpected character.",
-      "[line 1] Error: Unexpected character.",
-      "[line 1] Error: Unexpected character.",
-      "[line 1] Error: Unexpected character.",
-      "[line 1] Error: Unexpected character."
+      "[line 1] Error: Unexpected character: v",
+      "[line 1] Error: Unexpected character: a",
+      "[line 1] Error: Unexpected character: r",
+      "[line 1] Error: Unexpected character: l",
+      "[line 1] Error: Unexpected character: a",
+      "[line 1] Error: Unexpected character: n",
+      "[line 1] Error: Unexpected character: g",
+      "[line 1] Error: Unexpected character: u",
+      "[line 1] Error: Unexpected character: a",
+      "[line 1] Error: Unexpected character: g",
+      "[line 1] Error: Unexpected character: e",
+      "[line 1] Error: Unexpected character: =",
+      "[line 1] Error: Unexpected character: \"",
+      "[line 1] Error: Unexpected character: l",
+      "[line 1] Error: Unexpected character: o",
+      "[line 1] Error: Unexpected character: x",
+      "[line 1] Error: Unexpected character: \""
     ]
   }
 ]
