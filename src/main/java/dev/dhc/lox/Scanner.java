@@ -6,8 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
 
 public class Scanner {
   private final BufferedReader reader;
@@ -47,11 +50,34 @@ public class Scanner {
     return peek(0) == -1;
   }
 
-  // note: returns nonsense if eof
-  private char advance() throws IOException {
-    char c = (char) reader.read();
-    current.append(c);
-    return c;
+  private boolean peekIs(int... want) throws IOException {
+    int c = peek(0);
+    for (int wanted : want) {
+      if (c == wanted) return true;
+    }
+    return false;
+  }
+
+  private char advance() throws IOException, LoxError {
+    int c = reader.read();
+    if (c == -1) error("Unexpected eof.");
+    current.append((char)c);
+    return (char)c;
+  }
+
+  private void eat(char want) throws LoxError, IOException {
+    char got = advance();
+    if (got != want) {
+      error(String.format("Wanted %c, got %c.", want, got));
+    }
+  }
+
+  private boolean maybeEat(char want) throws IOException, LoxError {
+    if (peek(0) == want) {
+      eat(want);
+      return true;
+    }
+    return false;
   }
 
   private void emit(Type type) {
@@ -77,43 +103,38 @@ public class Scanner {
         case '+' -> emit(Type.PLUS);
         case '-' -> emit(Type.MINUS);
         case '*' -> emit(Type.STAR);
+
         case '=' -> {
-          if (peek(0) == '=') {
-            advance();
+          if (maybeEat('=')) {
             emit(Type.EQUAL_EQUAL);
           } else {
             emit(Type.EQUAL);
           }
         }
         case '!' -> {
-          if (peek(0) == '=') {
-            advance();
+          if (maybeEat('=')) {
             emit(Type.BANG_EQUAL);
           } else {
             emit(Type.BANG);
           }
         }
         case '<' -> {
-          if (peek(0) == '=') {
-            advance();
+          if (maybeEat('=')) {
             emit(Type.LESS_EQUAL);
           } else {
             emit(Type.LESS);
           }
         }
         case '>' -> {
-          if (peek(0) == '=') {
-            advance();
+          if (maybeEat('=')) {
             emit(Type.GREATER_EQUAL);
           } else {
             emit(Type.GREATER);
           }
         }
         case '/' -> {
-          if (peek(0) == '/') {
-            while (true) {
-              int next = peek(0);
-              if (next == -1 || next == '\n') break;
+          if (maybeEat('/')) {
+            while (!peekIs(-1, '\n')) {
               advance();
             }
             continue;
@@ -121,6 +142,15 @@ public class Scanner {
             emit(Type.SLASH);
           }
         }
+        /*
+        case '"' -> {
+          while (!peekIs(-1, '"')) {
+            advance();
+          }
+          eat('"');
+          emit(Type.STRING);
+        }
+         */
         case ' ', '\t', '\n' -> {
           if (c == '\n') line++;
           continue;
