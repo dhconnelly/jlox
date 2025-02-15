@@ -19,11 +19,13 @@ import dev.dhc.lox.AstNode.UnaryExpr;
 import dev.dhc.lox.AstNode.UnaryOp;
 import dev.dhc.lox.AstNode.VarDecl;
 import dev.dhc.lox.AstNode.VarExpr;
+import dev.dhc.lox.AstNode.WhileStmt;
 import dev.dhc.lox.LoxError.RuntimeError;
 import dev.dhc.lox.Value.BoolValue;
 import dev.dhc.lox.Value.NilValue;
 import dev.dhc.lox.Value.NumValue;
 import dev.dhc.lox.Value.StrValue;
+import dev.dhc.lox.Value.Type;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Optional;
@@ -45,24 +47,28 @@ public class Evaluator {
     };
   }
 
+  private RuntimeError typeError(Expr e, Type want, Value got) {
+    return new RuntimeError(e.line(), String.format("%s: want %s, got %s", e, want, got.type()));
+  }
+
   private double asNumber(Expr e) {
     return switch (evaluate(e)) {
       case NumValue(double value) -> value;
-      default -> throw new RuntimeError(e.line(), String.format("not a number: %s", e));
+      case Value v -> throw typeError(e, Type.NUM, v);
     };
   }
 
   private String asString(Expr e) {
     return switch (evaluate(e)) {
       case StrValue(String value) -> value;
-      default -> throw new RuntimeError(e.line(), String.format("not a string: %s", e));
+      case Value v -> throw typeError(e, Type.STR, v);
     };
   }
 
   private boolean asBool(Expr e) {
     return switch (evaluate(e)) {
       case BoolValue(boolean value) -> value;
-      default -> throw new RuntimeError(e.line(), String.format("not a boolean: %s", e));
+      case Value v -> throw typeError(e, Type.BOOL, v);
     };
   }
 
@@ -95,6 +101,9 @@ public class Evaluator {
       case IfElseStmt(_, Expr cond, Stmt conseq, Optional<Stmt> alt) -> {
         if (asBool(cond)) execute(conseq);
         else alt.ifPresent(this::execute);
+      }
+      case WhileStmt(_, Expr cond, Stmt body) -> {
+        while (asBool(cond)) execute(body);
       }
     }
   }

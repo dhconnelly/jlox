@@ -41,7 +41,7 @@ dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/plus_same_types_error.l
     "code": 70,
     "outLines": [ ],
     "errLines": [
-      "[line 1] Error: not a string: 7.0"
+      "[line 1] Error: 7.0: want STR, got NUM"
     ]
   }
 ]
@@ -52,7 +52,7 @@ dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/unary_error.lox]=[
     "code": 70,
     "outLines": [ ],
     "errLines": [
-      "[line 1] Error: not a number: foo"
+      "[line 1] Error: foo: want NUM, got STR"
     ]
   }
 ]
@@ -106,7 +106,19 @@ dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/control_flow.lox]=[
       "ok 3",
       "ok 4",
       "ok 5",
-      "ok 6"
+      "ok 6",
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "ok 7",
+      "ok 8"
     ],
     "errLines": [ ]
   }

@@ -42,6 +42,7 @@ import dev.dhc.lox.AstNode.UnaryExpr;
 import dev.dhc.lox.AstNode.UnaryOp;
 import dev.dhc.lox.AstNode.VarDecl;
 import dev.dhc.lox.AstNode.VarExpr;
+import dev.dhc.lox.AstNode.WhileStmt;
 import dev.dhc.lox.LoxError.SyntaxError;
 import dev.dhc.lox.Token.Type;
 import java.util.ArrayList;
@@ -109,6 +110,15 @@ public class Parser {
           alt = Optional.of(innerStmt());
         }
         yield new IfElseStmt(tok.line(), cond, conseq, alt);
+      }
+
+      case WHILE -> {
+        next();
+        eat(LEFT_PAREN, "Expect '('");
+        var cond = expr();
+        eat(RIGHT_PAREN, "Expect '('");
+        var body = innerStmt();
+        yield new WhileStmt(tok.line(), cond, body);
       }
 
       default -> {

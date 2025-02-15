@@ -30,3 +30,28 @@ if (false) {
 
 if (true) print "ok 5";
 if (false) print "fail"; else print "ok 6";
+
+var x = 0;
+while (x < 10) {
+  {
+    var x = "foo";
+  }
+  print x;
+  x = x + 1;
+}
+
+var x = 0;
+while (x < -1) {
+  print "fail";
+  x = x + 1;
+}
+print "ok 7";
+
+var seen = false;
+while (!seen) {
+  if (seen) print "fail";
+  seen = true;
+  break;
+  print "fail";
+}
+print "ok 8";
