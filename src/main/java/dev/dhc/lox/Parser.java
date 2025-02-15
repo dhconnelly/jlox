@@ -88,43 +88,64 @@ public class Parser {
 
   private Stmt innerStmt() {
     final var tok = peek();
+    final int line = tok.line();
     return switch (tok.type()) {
-      case LEFT_BRACE -> new BlockStmt(tok.line(), block());
+      case LEFT_BRACE -> new BlockStmt(line, block());
 
       case PRINT -> {
         next();
         final var e = expr();
         eat(SEMICOLON, "Expected ; after expression");
-        yield new PrintStmt(tok.line(), e);
+        yield new PrintStmt(line, e);
       }
 
       case IF -> {
         next();
         eat(LEFT_PAREN, "Expect '('");
-        var cond = expr();
+        final var cond = expr();
         eat(RIGHT_PAREN, "Expect '('");
-        var conseq = innerStmt();
+        final var conseq = innerStmt();
         var alt = Optional.<Stmt>empty();
         if (peekIs(ELSE)) {
           next();
           alt = Optional.of(innerStmt());
         }
-        yield new IfElseStmt(tok.line(), cond, conseq, alt);
+        yield new IfElseStmt(line, cond, conseq, alt);
       }
 
       case WHILE -> {
         next();
         eat(LEFT_PAREN, "Expect '('");
-        var cond = expr();
+        final var cond = expr();
         eat(RIGHT_PAREN, "Expect '('");
-        var body = innerStmt();
-        yield new WhileStmt(tok.line(), cond, body);
+        final var body = innerStmt();
+        yield new WhileStmt(line, cond, body);
+      }
+
+      case FOR -> {
+        next();
+        eat(LEFT_PAREN, "Expect '('");
+        final var init = expr();
+        eat(SEMICOLON, "Expect ';'");
+        final var cond = expr();
+        eat(SEMICOLON, "Expect ';'");
+        final var iter = expr();
+        eat(RIGHT_PAREN, "Expect '('");
+        final var body = innerStmt();
+
+        // desugar to while loop:
+        // 1. build a new block: first loop body, then iter
+        final var whileBody = new BlockStmt(line, List.of(body, new ExprStmt(iter.line(), iter)));
+        // 2. build a new loop without init
+        final var whileLoop = new WhileStmt(line, cond, whileBody);
+        // 3. insert the init before the new loop
+        yield new BlockStmt(line, List.of(new ExprStmt(init.line(), init), whileLoop));
       }
 
       default -> {
         final var e = expr();
         eat(SEMICOLON, "Expected ; after expression");
-        yield new ExprStmt(tok.line(), e);
+        yield new ExprStmt(line, e);
       }
     };
   }

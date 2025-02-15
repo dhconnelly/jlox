@@ -118,7 +118,12 @@ dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/control_flow.lox]=[
       "8",
       "9",
       "ok 7",
-      "ok 8"
+      "ok 8",
+      "101",
+      "11",
+      "2",
+      "1.1",
+      "ok 9"
     ],
     "errLines": [ ]
   }
