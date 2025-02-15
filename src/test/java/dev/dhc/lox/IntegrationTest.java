@@ -52,7 +52,7 @@ public class IntegrationTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings={
+  @ValueSource(strings = {
       "inputs/parser/test.lox",
       "inputs/parser/empty.lox",
       "inputs/parser/expressions.lox",
@@ -60,5 +60,14 @@ public class IntegrationTest {
   })
   void testParser(String resource) throws IOException {
     expect.scenario(resource).toMatchSnapshot(execute("parse", resourcePath(resource)));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {
+      "inputs/evaluator/empty.lox",
+      "inputs/evaluator/values.lox",
+  })
+  void testEvaluator(String resource) throws IOException {
+    expect.scenario(resource).toMatchSnapshot(execute("evaluate", resourcePath(resource)));
   }
 }

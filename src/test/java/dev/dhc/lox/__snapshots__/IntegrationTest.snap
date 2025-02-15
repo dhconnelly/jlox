@@ -1,3 +1,42 @@
+dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/empty.lox]=[
+  {
+    "code": 0,
+    "outLines": [ ],
+    "errLines": [ ]
+  }
+]
+
+
+dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/values.lox]=[
+  {
+    "code": 0,
+    "outLines": [
+      "NilValue[]",
+      "NilValue[]",
+      "NilValue[]",
+      "NilValue[]",
+      "NilValue[]",
+      "NilValue[]",
+      "NilValue[]",
+      "NilValue[]",
+      "NilValue[]",
+      "NilValue[]",
+      "NilValue[]",
+      "NilValue[]",
+      "NilValue[]",
+      "NilValue[]",
+      "NilValue[]",
+      "NilValue[]",
+      "NilValue[]",
+      "NilValue[]",
+      "NilValue[]",
+      "NilValue[]"
+    ],
+    "errLines": [ ]
+  }
+]
+
+
 dev.dhc.lox.IntegrationTest.testParser[inputs/parser/empty.lox]=[
   {
     "code": 0,
