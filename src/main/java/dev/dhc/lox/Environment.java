@@ -1,6 +1,6 @@
 package dev.dhc.lox;
 
-import dev.dhc.lox.LoxError.RuntimeError;
+import dev.dhc.lox.Error.RuntimeError;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;

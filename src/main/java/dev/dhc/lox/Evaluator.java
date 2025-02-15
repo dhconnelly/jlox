@@ -20,7 +20,7 @@ import dev.dhc.lox.AstNode.UnaryOp;
 import dev.dhc.lox.AstNode.VarDecl;
 import dev.dhc.lox.AstNode.VarExpr;
 import dev.dhc.lox.AstNode.WhileStmt;
-import dev.dhc.lox.LoxError.RuntimeError;
+import dev.dhc.lox.Error.RuntimeError;
 import dev.dhc.lox.Value.BoolValue;
 import dev.dhc.lox.Value.NilValue;
 import dev.dhc.lox.Value.NumValue;

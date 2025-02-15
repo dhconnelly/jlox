@@ -1,7 +1,7 @@
 package dev.dhc.lox;
 
-import dev.dhc.lox.LoxError.IOError;
-import dev.dhc.lox.LoxError.SyntaxError;
+import dev.dhc.lox.Error.IOError;
+import dev.dhc.lox.Error.SyntaxError;
 import dev.dhc.lox.Token.Literal;
 import dev.dhc.lox.Token.NumberLiteral;
 import dev.dhc.lox.Token.StringLiteral;

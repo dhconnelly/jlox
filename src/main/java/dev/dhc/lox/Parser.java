@@ -43,7 +43,7 @@ import dev.dhc.lox.AstNode.UnaryOp;
 import dev.dhc.lox.AstNode.VarDecl;
 import dev.dhc.lox.AstNode.VarExpr;
 import dev.dhc.lox.AstNode.WhileStmt;
-import dev.dhc.lox.LoxError.SyntaxError;
+import dev.dhc.lox.Error.SyntaxError;
 import dev.dhc.lox.Token.Type;
 import java.util.ArrayList;
 import java.util.List;

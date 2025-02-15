@@ -34,7 +34,7 @@ public class Driver {
   public Status run(Command cmd) {
     try {
       return runInternal(cmd);
-    } catch (LoxError e) {
+    } catch (Error e) {
       err.println(e.getMessage());
       return e.code();
     } catch (IOException e) {
@@ -53,7 +53,7 @@ public class Driver {
             final var tok = scanner.nextToken();
             out.println(tok);
             if (tok.type() == Type.EOF) break;
-          } catch (LoxError e) {
+          } catch (Error e) {
             err.println(e.getMessage());
             code = e.code();
           }
