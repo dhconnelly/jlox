@@ -1,6 +1,5 @@
 package dev.dhc.lox;
 
-import dev.dhc.lox.LoxError.IOError;
 import dev.dhc.lox.Token.Type;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -24,22 +23,6 @@ public class Driver {
     this.err = err;
   }
 
-  private Scanner scan(Path path) {
-    try {
-      return new Scanner(Files.newInputStream(path));
-    } catch (IOException e) {
-      throw new IOError(e);
-    }
-  }
-
-  private Parser parse(Path path) {
-    return new Parser(scan(path));
-  }
-
-  private Parser parse(String text) {
-    return new Parser(new Scanner(new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8))));
-  }
-
   public sealed interface Command {
     record Tokenize(String path) implements Command {}
     record Parse(String path) implements Command {}
@@ -49,7 +32,18 @@ public class Driver {
   }
 
   public Status run(Command cmd) {
-    final var evaluator = new Evaluator(out);
+    try {
+      return runInternal(cmd);
+    } catch (LoxError e) {
+      err.println(e.getMessage());
+      return e.code();
+    } catch (IOException e) {
+      err.println(e.getMessage());
+      return Status.IO_ERROR;
+    }
+  }
+
+  private Status runInternal(Command cmd) throws IOException {
     return switch (cmd) {
       case Command.Tokenize(var path) -> {
         final var scanner = scan(Paths.get(path));
@@ -68,64 +62,52 @@ public class Driver {
       }
 
       case Command.Parse(var path) -> {
-        final var parser = parse(Paths.get(path));
-        try {
-          while (!parser.eof()) {
-            out.println(parser.expr());
-          }
-        } catch (LoxError e) {
-          err.println(e.getMessage());
-          yield e.code();
+        final var parser = new Parser(scan(Paths.get(path)));
+        while (!parser.eof()) {
+          out.println(parser.expr());
         }
         yield Status.SUCCESS;
       }
 
       case Command.Evaluate(var path) -> {
-        final var parser = parse(Paths.get(path));
-        var code = Status.SUCCESS;
+        final var parser = new Parser(scan(Paths.get(path)));
+        final var evaluator = new Evaluator(out);
         while (!parser.eof()) {
-          try {
-            out.println(evaluator.evaluate(parser.expr()));
-          } catch (LoxError e) {
-            err.println(e.getMessage());
-            code = e.code();
-          }
+          out.println(evaluator.evaluate(parser.expr()));
         }
-        yield code;
+        yield Status.SUCCESS;
       }
 
       case Command.Run(var path) -> {
-        try {
-          final var program = parse(Paths.get(path)).program();
-          for (var stmt : program.stmts()) {
-            evaluator.execute(stmt);
-          }
-        } catch (LoxError e) {
-          err.println(e.getMessage());
-          yield e.code();
+        final var program = new Parser(scan(Paths.get(path))).program();
+        final var evaluator = new Evaluator(out);
+        for (var stmt : program.stmts()) {
+          evaluator.execute(stmt);
         }
         yield Status.SUCCESS;
       }
 
       case Command.Repl() -> {
         final var reader = new BufferedReader(new InputStreamReader(in));
-        var code = Status.SUCCESS;
+        final var evaluator = new Evaluator(out);
         while (true) {
           out.print("> ");
           try {
             final var line = reader.readLine();
             if (line == null) break;
-            evaluator.execute(parse(line).stmtOrDecl());
-          } catch (LoxError e) {
+            final var stream = new ByteArrayInputStream(line.getBytes(StandardCharsets.UTF_8));
+            final var stmt = new Parser(new Scanner(stream)).stmtOrDecl();
+            evaluator.execute(stmt);
+          } catch (Exception e) {
             err.println(e.getMessage());
-            code = e.code();
-          } catch (IOException e) {
-            err.println(e.getMessage());
-            code = Status.IO_ERROR;
           }
         }
-        yield code;
+        yield Status.SUCCESS;
       }
     };
+  }
+
+  private Scanner scan(Path path) throws IOException {
+    return new Scanner(Files.newInputStream(path));
   }
 }
