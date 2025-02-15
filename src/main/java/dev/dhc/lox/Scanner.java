@@ -1,5 +1,6 @@
 package dev.dhc.lox;
 
+import dev.dhc.lox.LoxError.IOError;
 import dev.dhc.lox.LoxError.SyntaxError;
 import dev.dhc.lox.Token.Literal;
 import dev.dhc.lox.Token.NumberLiteral;
@@ -28,44 +29,52 @@ public class Scanner {
     return new Token(line, Type.EOF, "", Optional.empty());
   }
 
-  public Token nextToken() throws IOException {
+  public Token nextToken() {
     if (lookahead.isEmpty()) scan();
     final var token = lookahead.pollFirst();
     return token != null ? token : eofToken();
   }
 
   // note: O(n)
-  public Token peekToken(int n) throws IOException {
+  public Token peekToken(int n) {
     for (int i = lookahead.size(); i <= n; i++) scan();
     return lookahead.stream().skip(n).findFirst().orElseGet(this::eofToken);
   }
 
-  private int peek(int n) throws IOException {
-    reader.mark(n+1);
-    reader.skip(n);
-    int c = reader.read();
-    reader.reset();
-    return c;
+  private int peek(int n) {
+    try {
+      reader.mark(n + 1);
+      reader.skip(n);
+      int c = reader.read();
+      reader.reset();
+      return c;
+    } catch (IOException e) {
+      throw new IOError(e);
+    }
   }
 
-  private boolean isEof() throws IOException {
+  private boolean isEof() {
     return peek(0) == -1;
   }
 
-  private char advance() throws IOException {
-    int c = reader.read();
-    if (c == -1) error("Unexpected eof.");
-    current.append((char)c);
-    return (char)c;
+  private char advance() {
+    try {
+      int c = reader.read();
+      if (c == -1) error("Unexpected eof.");
+      current.append((char) c);
+      return (char) c;
+    } catch (IOException e) {
+      throw new IOError(e);
+    }
   }
 
-  private void eat(char want, String orError) throws IOException {
+  private void eat(char want, String orError) {
     int got = peek(0);
     if (got != want) error(orError);
     advance();
   }
 
-  private boolean maybeEat(Predicate<Character> p) throws IOException {
+  private boolean maybeEat(Predicate<Character> p) {
     int c = peek(0);
     if (c != -1 && p.test((char) c)) {
       advance();
@@ -74,17 +83,17 @@ public class Scanner {
     return false;
   }
 
-  private boolean maybeEat(char want) throws IOException {
+  private boolean maybeEat(char want) {
     return maybeEat(c -> c == want);
   }
 
-  private void eatWhile(Predicate<Character> p) throws IOException {
+  private void eatWhile(Predicate<Character> p) {
     while (maybeEat(p)) {
       // eat
     }
   }
 
-  private void eatUntil(char want) throws IOException {
+  private void eatUntil(char want) {
     while (true) {
       int c = peek(0);
       if (c == -1 || c == want) break;
@@ -138,7 +147,7 @@ public class Scanner {
     };
   }
 
-  private void scan() throws IOException {
+  private void scan() {
     while (!isEof()) {
       current.setLength(0);
       char c = advance();

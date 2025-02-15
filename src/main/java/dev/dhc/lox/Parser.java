@@ -39,7 +39,6 @@ import dev.dhc.lox.AstNode.VarDecl;
 import dev.dhc.lox.AstNode.VarExpr;
 import dev.dhc.lox.LoxError.SyntaxError;
 import dev.dhc.lox.Token.Type;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -51,19 +50,19 @@ public class Parser {
     this.scanner = scanner;
   }
 
-  public boolean eof() throws IOException {
+  public boolean eof() {
     return scanner.peekToken(0).type() == Type.EOF;
   }
 
-  private Token next() throws IOException {
+  private Token next() {
     return scanner.nextToken();
   }
 
-  private Token peek() throws IOException {
+  private Token peek() {
     return scanner.peekToken(0);
   }
 
-  private boolean peekIs(Type... types) throws IOException {
+  private boolean peekIs(Type... types) {
     final var tok = peek();
     for (Type type : types) {
       if (type == tok.type()) return true;
@@ -71,17 +70,17 @@ public class Parser {
     return false;
   }
 
-  private List<Stmt> block() throws IOException {
+  private List<Stmt> block() {
     eat(LEFT_BRACE, "Expected '{'");
     final var stmts = new ArrayList<Stmt>();
     while (!eof() && !peekIs(RIGHT_BRACE)) {
-      stmts.add(decl());
+      stmts.add(stmtOrDecl());
     }
     eat(RIGHT_BRACE, "Expected '}'");
     return stmts;
   }
 
-  public Stmt stmt() throws IOException {
+  private Stmt stmt() {
     final var tok = peek();
     return switch (tok.type()) {
       case PRINT -> {
@@ -99,7 +98,7 @@ public class Parser {
     };
   }
 
-  public Stmt decl() throws IOException {
+  public Stmt stmtOrDecl() {
     int line = peek().line();
     if (peekIs(VAR)) {
       next();
@@ -115,10 +114,10 @@ public class Parser {
     return stmt();
   }
 
-  public Program program() throws IOException {
+  public Program program() {
     final var stmts = new ArrayList<Stmt>();
     while (!eof()) {
-      stmts.add(decl());
+      stmts.add(stmtOrDecl());
     }
     return new Program(stmts);
   }
@@ -139,11 +138,11 @@ public class Parser {
     };
   }
 
-  public Expr expr() throws IOException {
+  public Expr expr() {
     return assignment();
   }
 
-  public Expr assignment() throws IOException {
+  private Expr assignment() {
     final var expr = equality();
     if (peekIs(EQUAL)) {
       next();
@@ -157,7 +156,7 @@ public class Parser {
     return expr;
   }
 
-  private Expr equality() throws IOException {
+  private Expr equality() {
     var expr = comparison();
     while (peekIs(BANG_EQUAL, EQUAL_EQUAL)) {
       final var op = binOp(next());
@@ -167,7 +166,7 @@ public class Parser {
     return expr;
   }
 
-  private Expr comparison() throws IOException {
+  private Expr comparison() {
     var expr = term();
     while (peekIs(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
       final var op = binOp(next());
@@ -177,7 +176,7 @@ public class Parser {
     return expr;
   }
 
-  private Expr term() throws IOException {
+  private Expr term() {
     var expr = factor();
     while (peekIs(MINUS, PLUS)) {
       final var op = binOp(next());
@@ -187,7 +186,7 @@ public class Parser {
     return expr;
   }
 
-  private Expr factor() throws IOException {
+  private Expr factor() {
     var expr = unary();
     while (peekIs(SLASH, STAR)) {
       final var op = binOp(next());
@@ -205,7 +204,7 @@ public class Parser {
     };
   }
 
-  private Expr unary() throws IOException {
+  private Expr unary() {
     if (peekIs(BANG, MINUS)) {
       final int line = peek().line();
       final var op = unaryOp(next());
@@ -215,12 +214,12 @@ public class Parser {
     return primary();
   }
 
-  private Token eat(Type type, String message) throws IOException {
+  private Token eat(Type type, String message) {
     if (!peekIs(type)) throw new SyntaxError(peek().line(), message);
     return next();
   }
 
-  private Expr primary() throws IOException {
+  private Expr primary() {
     final var tok = peek();
     return switch (tok.type()) {
       case NIL -> new NilExpr(next().line());
