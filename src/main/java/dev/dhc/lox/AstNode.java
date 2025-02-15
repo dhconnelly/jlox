@@ -10,7 +10,8 @@ public sealed interface AstNode {
     BANG_EQUAL("!="), EQUAL_EQUAL("=="),
     PLUS("+"), MINUS("-"), SLASH("/"), STAR("*"),
     GREATER(">"), GREATER_EQUAL(">="),
-    LESS("<"), LESS_EQUAL("<=");
+    LESS("<"), LESS_EQUAL("<="),
+    AND("and"), OR("or");
 
     private final String s;
     BinOp(String s) { this.s = s; }

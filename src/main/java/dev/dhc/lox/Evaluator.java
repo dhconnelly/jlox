@@ -58,6 +58,13 @@ public class Evaluator {
     };
   }
 
+  private boolean asBool(Expr e) {
+    return switch (evaluate(e)) {
+      case BoolValue(boolean value) -> value;
+      default -> throw new RuntimeError(e.line(), String.format("not a boolean: %s", e));
+    };
+  }
+
   public void run(Program program) {
     for (final var stmt : program.stmts()) {
       execute(stmt);
@@ -115,6 +122,8 @@ public class Evaluator {
         case LESS_EQUAL -> new BoolValue(asNumber(left) <= asNumber(right));
         case BANG_EQUAL -> new BoolValue(!evaluate(left).equals(evaluate(right)));
         case EQUAL_EQUAL -> new BoolValue(evaluate(left).equals(evaluate(right)));
+        case AND -> new BoolValue(asBool(left) && asBool(right));
+        case OR -> new BoolValue(asBool(left) || asBool(right));
       };
       case null -> throw new AssertionError("expr cannot be null");
     };

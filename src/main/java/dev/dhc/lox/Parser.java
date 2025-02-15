@@ -1,5 +1,6 @@
 package dev.dhc.lox;
 
+import static dev.dhc.lox.Token.Type.AND;
 import static dev.dhc.lox.Token.Type.BANG;
 import static dev.dhc.lox.Token.Type.BANG_EQUAL;
 import static dev.dhc.lox.Token.Type.EQUAL;
@@ -11,6 +12,7 @@ import static dev.dhc.lox.Token.Type.LEFT_BRACE;
 import static dev.dhc.lox.Token.Type.LESS;
 import static dev.dhc.lox.Token.Type.LESS_EQUAL;
 import static dev.dhc.lox.Token.Type.MINUS;
+import static dev.dhc.lox.Token.Type.OR;
 import static dev.dhc.lox.Token.Type.PLUS;
 import static dev.dhc.lox.Token.Type.RIGHT_BRACE;
 import static dev.dhc.lox.Token.Type.RIGHT_PAREN;
@@ -124,6 +126,8 @@ public class Parser {
 
   private BinOp binOp(Token tok) {
     return switch (tok.type()) {
+      case AND -> BinOp.AND;
+      case OR -> BinOp.OR;
       case BANG_EQUAL -> BinOp.BANG_EQUAL;
       case EQUAL_EQUAL -> BinOp.EQUAL_EQUAL;
       case GREATER -> BinOp.GREATER;
@@ -143,7 +147,7 @@ public class Parser {
   }
 
   private Expr assignment() {
-    final var expr = equality();
+    final var expr = or();
     if (peekIs(EQUAL)) {
       next();
       final var binding = expr();
@@ -152,6 +156,26 @@ public class Parser {
       } else {
         throw new SyntaxError(expr.line(), String.format("Invalid assignment target: %s", expr));
       }
+    }
+    return expr;
+  }
+
+  private Expr or() {
+    var expr = and();
+    while (peekIs(OR)) {
+      final var op = binOp(next());
+      final var rhs = and();
+      expr = new BinaryExpr(expr.line(), expr, op, rhs);
+    }
+    return expr;
+  }
+
+  private Expr and() {
+    var expr = equality();
+    while (peekIs(AND)) {
+      final var op = binOp(next());
+      final var rhs = equality();
+      expr = new BinaryExpr(expr.line(), expr, op, rhs);
     }
     return expr;
   }

@@ -1,3 +1,21 @@
+dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/control_flow.lox]=[
+  {
+    "code": 0,
+    "outLines": [
+      "true",
+      "false",
+      "false",
+      "false",
+      "true",
+      "false",
+      "true",
+      "true"
+    ],
+    "errLines": [ ]
+  }
+]
+
+
 dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/empty.lox]=[
   {
     "code": 0,
