@@ -48,4 +48,8 @@ public sealed interface AstNode {
       return String.format("(group %s)", expr);
     }
   }
+
+  sealed interface Stmt extends AstNode {}
+  record ExprStmt(int line, Expr expr) implements Stmt {}
+  record PrintStmt(int line, Expr expr) implements Stmt {}
 }

@@ -1,0 +1,7 @@
+print 5;
+print "hello, world!";
+print true;
+print nil;
+print (5 + 4) < 7;
+true;
+nil;

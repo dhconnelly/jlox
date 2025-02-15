@@ -76,7 +76,7 @@ public class Main {
         final var in = Files.newInputStream(Paths.get(args[1]));
         final var scanner = new Scanner(in);
         final var parser = new Parser(scanner);
-        final var evaluator = new Evaluator();
+        final var evaluator = new Evaluator(env.out);
           while (!parser.eof()) {
             try {
             final var expr = parser.expr();
@@ -87,6 +87,27 @@ public class Main {
           return e.code();
         }
           }
+        return SUCCESS;
+      }
+
+      case "interpret" -> {
+        if (args.length != 2) {
+          env.err.println("usage: lox interpret FILE");
+          return USAGE_ERROR;
+        }
+        final var in = Files.newInputStream(Paths.get(args[1]));
+        final var scanner = new Scanner(in);
+        final var parser = new Parser(scanner);
+        final var evaluator = new Evaluator(env.out);
+        while (!parser.eof()) {
+          try {
+            final var expr = parser.stmt();
+            evaluator.execute(expr);
+          } catch (LoxError e) {
+            env.err.println(e.getMessage());
+            return e.code();
+          }
+        }
         return SUCCESS;
       }
 

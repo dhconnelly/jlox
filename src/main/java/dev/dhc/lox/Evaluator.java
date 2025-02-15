@@ -4,9 +4,12 @@ import dev.dhc.lox.AstNode.BinOp;
 import dev.dhc.lox.AstNode.BinaryExpr;
 import dev.dhc.lox.AstNode.BoolExpr;
 import dev.dhc.lox.AstNode.Expr;
+import dev.dhc.lox.AstNode.ExprStmt;
 import dev.dhc.lox.AstNode.Grouping;
 import dev.dhc.lox.AstNode.NilExpr;
 import dev.dhc.lox.AstNode.NumExpr;
+import dev.dhc.lox.AstNode.PrintStmt;
+import dev.dhc.lox.AstNode.Stmt;
 import dev.dhc.lox.AstNode.StrExpr;
 import dev.dhc.lox.AstNode.UnaryExpr;
 import dev.dhc.lox.AstNode.UnaryOp;
@@ -15,11 +18,18 @@ import dev.dhc.lox.Value.BoolValue;
 import dev.dhc.lox.Value.NilValue;
 import dev.dhc.lox.Value.NumValue;
 import dev.dhc.lox.Value.StrValue;
+import java.io.PrintStream;
 
 public class Evaluator {
+  private final PrintStream out;
+
+  public Evaluator(PrintStream out) {
+    this.out = out;
+  }
+
   private boolean isTruthy(Expr e) {
     return switch (e) {
-      case NilExpr nil -> true;
+      case NilExpr nil -> false;
       case BoolExpr(int line, boolean value) -> value;
       default -> true;
     };
@@ -37,6 +47,13 @@ public class Evaluator {
       case StrValue(String value) -> value;
       default -> throw new RuntimeError(e.line(), String.format("not a string: %s", e));
     };
+  }
+
+  public void execute(Stmt stmt) {
+    switch (stmt) {
+      case ExprStmt(int line, Expr e) -> evaluate(e);
+      case PrintStmt(int line, Expr e) -> out.println(evaluate(e));
+    }
   }
 
   public Value evaluate(Expr expr) {

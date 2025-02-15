@@ -13,7 +13,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 @ExtendWith({SnapshotExtension.class})
@@ -73,5 +72,13 @@ public class IntegrationTest {
   })
   void testEvaluator(String resource) throws IOException {
     expect.scenario(resource).toMatchSnapshot(execute("evaluate", resourcePath(resource)));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {
+      "inputs/interpreter/statements.lox",
+  })
+  void testInterpreter(String resource) throws IOException {
+    expect.scenario(resource).toMatchSnapshot(execute("interpret", resourcePath(resource)));
   }
 }

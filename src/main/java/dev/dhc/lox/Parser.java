@@ -10,6 +10,7 @@ import static dev.dhc.lox.Token.Type.LESS_EQUAL;
 import static dev.dhc.lox.Token.Type.MINUS;
 import static dev.dhc.lox.Token.Type.PLUS;
 import static dev.dhc.lox.Token.Type.RIGHT_PAREN;
+import static dev.dhc.lox.Token.Type.SEMICOLON;
 import static dev.dhc.lox.Token.Type.SLASH;
 import static dev.dhc.lox.Token.Type.STAR;
 
@@ -17,9 +18,12 @@ import dev.dhc.lox.AstNode.BinOp;
 import dev.dhc.lox.AstNode.BinaryExpr;
 import dev.dhc.lox.AstNode.BoolExpr;
 import dev.dhc.lox.AstNode.Expr;
+import dev.dhc.lox.AstNode.ExprStmt;
 import dev.dhc.lox.AstNode.Grouping;
 import dev.dhc.lox.AstNode.NilExpr;
 import dev.dhc.lox.AstNode.NumExpr;
+import dev.dhc.lox.AstNode.PrintStmt;
+import dev.dhc.lox.AstNode.Stmt;
 import dev.dhc.lox.AstNode.StrExpr;
 import dev.dhc.lox.AstNode.UnaryExpr;
 import dev.dhc.lox.AstNode.UnaryOp;
@@ -56,6 +60,23 @@ public class Parser {
 
   public Expr expr() throws IOException {
     return equality();
+  }
+
+  public Stmt stmt() throws IOException {
+    final var tok = peek();
+    return switch (tok.type()) {
+      case PRINT -> {
+        next();
+        final var e = expr();
+        eat(SEMICOLON, "Expected ; after expression");
+        yield new PrintStmt(tok.line(), e);
+      }
+      default -> {
+        final var e = expr();
+        eat(SEMICOLON, "Expected ; after expression");
+        yield new ExprStmt(tok.line(), e);
+      }
+    };
   }
 
   private BinOp binOp(Token tok) {

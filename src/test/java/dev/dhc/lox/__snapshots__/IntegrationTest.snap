@@ -70,9 +70,24 @@ dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/values.lox]=[
       "false",
       "false",
       "false",
-      "false",
+      "true",
       "true",
       "foobarbaz"
+    ],
+    "errLines": [ ]
+  }
+]
+
+
+dev.dhc.lox.IntegrationTest.testInterpreter[inputs/interpreter/statements.lox]=[
+  {
+    "code": 0,
+    "outLines": [
+      "5",
+      "hello, world!",
+      "true",
+      "nil",
+      "false"
     ],
     "errLines": [ ]
   }
