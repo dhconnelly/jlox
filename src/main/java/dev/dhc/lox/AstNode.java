@@ -1,5 +1,7 @@
 package dev.dhc.lox;
 
+import java.util.List;
+
 public sealed interface AstNode {
   int line();
 
@@ -52,4 +54,6 @@ public sealed interface AstNode {
   sealed interface Stmt extends AstNode {}
   record ExprStmt(int line, Expr expr) implements Stmt {}
   record PrintStmt(int line, Expr expr) implements Stmt {}
+
+  record Program(List<Stmt> stmts) {}
 }

@@ -23,6 +23,7 @@ import dev.dhc.lox.AstNode.Grouping;
 import dev.dhc.lox.AstNode.NilExpr;
 import dev.dhc.lox.AstNode.NumExpr;
 import dev.dhc.lox.AstNode.PrintStmt;
+import dev.dhc.lox.AstNode.Program;
 import dev.dhc.lox.AstNode.Stmt;
 import dev.dhc.lox.AstNode.StrExpr;
 import dev.dhc.lox.AstNode.UnaryExpr;
@@ -30,6 +31,7 @@ import dev.dhc.lox.AstNode.UnaryOp;
 import dev.dhc.lox.LoxError.SyntaxError;
 import dev.dhc.lox.Token.Type;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class Parser {
   private final Scanner scanner;
@@ -77,6 +79,14 @@ public class Parser {
         yield new ExprStmt(tok.line(), e);
       }
     };
+  }
+
+  public Program program() throws IOException {
+    final var stmts = new ArrayList<Stmt>();
+    while (!eof()) {
+      stmts.add(stmt());
+    }
+    return new Program(stmts);
   }
 
   private BinOp binOp(Token tok) {

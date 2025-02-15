@@ -114,6 +114,7 @@ public class Main {
       case "repl" -> {
         final var reader = new BufferedReader(new InputStreamReader(env.in));
         boolean hadError = false;
+        final var evaluator = new Evaluator(env.out);
         while (true) {
           env.out.print("> ");
           final var line = reader.readLine();
@@ -122,8 +123,8 @@ public class Main {
           final var parser = new Parser(scanner);
           try {
             while (!parser.eof()) {
-              final var expr = parser.expr();
-              env.out.println(expr);
+              final var stmt = parser.stmt();
+              evaluator.execute(stmt);
             }
           } catch (LoxError e) {
             env.err.println(e.getMessage());
@@ -142,10 +143,9 @@ public class Main {
         final var scanner = new Scanner(in);
         final var parser = new Parser(scanner);
         try {
-          while (!parser.eof()) {
-            final var expr = parser.expr();
-            env.out.println(expr);
-          }
+          final var program = parser.program();
+          final var evaluator = new Evaluator(env.out);
+          evaluator.run(program);
         } catch (LoxError e) {
           env.err.println(e.getMessage());
           return e.code();

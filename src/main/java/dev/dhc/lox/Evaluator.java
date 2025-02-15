@@ -9,6 +9,7 @@ import dev.dhc.lox.AstNode.Grouping;
 import dev.dhc.lox.AstNode.NilExpr;
 import dev.dhc.lox.AstNode.NumExpr;
 import dev.dhc.lox.AstNode.PrintStmt;
+import dev.dhc.lox.AstNode.Program;
 import dev.dhc.lox.AstNode.Stmt;
 import dev.dhc.lox.AstNode.StrExpr;
 import dev.dhc.lox.AstNode.UnaryExpr;
@@ -47,6 +48,12 @@ public class Evaluator {
       case StrValue(String value) -> value;
       default -> throw new RuntimeError(e.line(), String.format("not a string: %s", e));
     };
+  }
+
+  public void run(Program program) {
+    for (final var stmt : program.stmts()) {
+      execute(stmt);
+    }
   }
 
   public void execute(Stmt stmt) {
