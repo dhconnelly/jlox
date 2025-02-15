@@ -88,7 +88,8 @@ dev.dhc.lox.IntegrationTest.testInterpreter[inputs/interpreter/statements.lox]=[
       "true",
       "nil",
       "false",
-      "5"
+      "5",
+      "nil"
     ],
     "errLines": [ ]
   }

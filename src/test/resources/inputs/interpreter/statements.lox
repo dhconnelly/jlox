@@ -8,3 +8,5 @@ nil;
 var x = 5;
 x;
 print x;
+var y;
+print y;
