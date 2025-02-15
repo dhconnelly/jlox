@@ -87,9 +87,21 @@ dev.dhc.lox.IntegrationTest.testInterpreter[inputs/interpreter/statements.lox]=[
       "hello, world!",
       "true",
       "nil",
-      "false"
+      "false",
+      "5"
     ],
     "errLines": [ ]
+  }
+]
+
+
+dev.dhc.lox.IntegrationTest.testInterpreter[inputs/interpreter/undefined_error.lox]=[
+  {
+    "code": 70,
+    "outLines": [ ],
+    "errLines": [
+      "Error: Undefined variable: 'foo'"
+    ]
   }
 ]
 
@@ -117,7 +129,8 @@ dev.dhc.lox.IntegrationTest.testParser[inputs/parser/expressions.lox]=[
       "(/ (* 16.0 38.0) 58.0)",
       "(- (+ 52.0 80.0) 94.0)",
       "(< (< 83.0 99.0) 115.0)",
-      "(== baz baz)"
+      "(== baz baz)",
+      "foo"
     ],
     "errLines": [ ]
   }

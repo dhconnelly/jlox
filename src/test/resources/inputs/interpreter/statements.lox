@@ -5,3 +5,6 @@ print nil;
 print (5 + 4) < 7;
 true;
 nil;
+var x = 5;
+x;
+print x;

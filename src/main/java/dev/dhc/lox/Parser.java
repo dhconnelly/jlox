@@ -2,9 +2,11 @@ package dev.dhc.lox;
 
 import static dev.dhc.lox.Token.Type.BANG;
 import static dev.dhc.lox.Token.Type.BANG_EQUAL;
+import static dev.dhc.lox.Token.Type.EQUAL;
 import static dev.dhc.lox.Token.Type.EQUAL_EQUAL;
 import static dev.dhc.lox.Token.Type.GREATER;
 import static dev.dhc.lox.Token.Type.GREATER_EQUAL;
+import static dev.dhc.lox.Token.Type.IDENTIFIER;
 import static dev.dhc.lox.Token.Type.LESS;
 import static dev.dhc.lox.Token.Type.LESS_EQUAL;
 import static dev.dhc.lox.Token.Type.MINUS;
@@ -13,10 +15,12 @@ import static dev.dhc.lox.Token.Type.RIGHT_PAREN;
 import static dev.dhc.lox.Token.Type.SEMICOLON;
 import static dev.dhc.lox.Token.Type.SLASH;
 import static dev.dhc.lox.Token.Type.STAR;
+import static dev.dhc.lox.Token.Type.VAR;
 
 import dev.dhc.lox.AstNode.BinOp;
 import dev.dhc.lox.AstNode.BinaryExpr;
 import dev.dhc.lox.AstNode.BoolExpr;
+import dev.dhc.lox.AstNode.Decl;
 import dev.dhc.lox.AstNode.Expr;
 import dev.dhc.lox.AstNode.ExprStmt;
 import dev.dhc.lox.AstNode.Grouping;
@@ -28,10 +32,13 @@ import dev.dhc.lox.AstNode.Stmt;
 import dev.dhc.lox.AstNode.StrExpr;
 import dev.dhc.lox.AstNode.UnaryExpr;
 import dev.dhc.lox.AstNode.UnaryOp;
+import dev.dhc.lox.AstNode.VarDecl;
+import dev.dhc.lox.AstNode.VarExpr;
 import dev.dhc.lox.LoxError.SyntaxError;
 import dev.dhc.lox.Token.Type;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class Parser {
   private final Scanner scanner;
@@ -81,12 +88,28 @@ public class Parser {
     };
   }
 
-  public Program program() throws IOException {
-    final var stmts = new ArrayList<Stmt>();
-    while (!eof()) {
-      stmts.add(stmt());
+  public Decl decl() throws IOException {
+    int line = peek().line();
+    if (peekIs(VAR)) {
+      next();
+      final var name = eat(IDENTIFIER, "Expected variable name").cargo();
+      var init = Optional.<Expr>empty();
+      if (peekIs(EQUAL)) {
+        next();
+        init = Optional.of(expr());
+      }
+      eat(SEMICOLON, "Expected ; after variable declaration");
+      return new VarDecl(line, name, init);
     }
-    return new Program(stmts);
+    return stmt();
+  }
+
+  public Program program() throws IOException {
+    final var decls = new ArrayList<Decl>();
+    while (!eof()) {
+      decls.add(decl());
+    }
+    return new Program(decls);
   }
 
   private BinOp binOp(Token tok) {
@@ -163,9 +186,9 @@ public class Parser {
     return primary();
   }
 
-  private void eat(Type type, String message) throws IOException {
+  private Token eat(Type type, String message) throws IOException {
     if (!peekIs(type)) throw new SyntaxError(peek().line(), message);
-    next();
+    return next();
   }
 
   private Expr primary() throws IOException {
@@ -176,6 +199,7 @@ public class Parser {
       case FALSE -> new BoolExpr(next().line(), false);
       case NUMBER -> new NumExpr(next().line(), tok.literal().get().asNumber());
       case STRING -> new StrExpr(next().line(), tok.literal().get().asString());
+      case IDENTIFIER -> new VarExpr(next().line(), tok.cargo());
       case LEFT_PAREN -> {
         next();
         final var expr = expr();

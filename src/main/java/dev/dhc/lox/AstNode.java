@@ -1,6 +1,7 @@
 package dev.dhc.lox;
 
 import java.util.List;
+import java.util.Optional;
 
 public sealed interface AstNode {
   int line();
@@ -50,10 +51,17 @@ public sealed interface AstNode {
       return String.format("(group %s)", expr);
     }
   }
+  record VarExpr(int line, String name) implements Expr {
+    @Override public String toString() {
+      return name;
+    }
+  }
 
-  sealed interface Stmt extends AstNode {}
+  sealed interface Decl extends AstNode {}
+  record VarDecl(int line, String name, Optional<Expr> init) implements Decl {}
+  sealed interface Stmt extends Decl {}
   record ExprStmt(int line, Expr expr) implements Stmt {}
   record PrintStmt(int line, Expr expr) implements Stmt {}
 
-  record Program(List<Stmt> stmts) {}
+  record Program(List<Decl> decls) {}
 }

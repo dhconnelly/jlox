@@ -3,6 +3,7 @@ package dev.dhc.lox;
 import dev.dhc.lox.AstNode.BinOp;
 import dev.dhc.lox.AstNode.BinaryExpr;
 import dev.dhc.lox.AstNode.BoolExpr;
+import dev.dhc.lox.AstNode.Decl;
 import dev.dhc.lox.AstNode.Expr;
 import dev.dhc.lox.AstNode.ExprStmt;
 import dev.dhc.lox.AstNode.Grouping;
@@ -14,15 +15,20 @@ import dev.dhc.lox.AstNode.Stmt;
 import dev.dhc.lox.AstNode.StrExpr;
 import dev.dhc.lox.AstNode.UnaryExpr;
 import dev.dhc.lox.AstNode.UnaryOp;
+import dev.dhc.lox.AstNode.VarDecl;
+import dev.dhc.lox.AstNode.VarExpr;
 import dev.dhc.lox.LoxError.RuntimeError;
 import dev.dhc.lox.Value.BoolValue;
 import dev.dhc.lox.Value.NilValue;
 import dev.dhc.lox.Value.NumValue;
 import dev.dhc.lox.Value.StrValue;
 import java.io.PrintStream;
+import java.util.Optional;
 
 public class Evaluator {
   private final PrintStream out;
+  private final Environment env = new Environment();
+  private static final Value NIL = new NilValue();
 
   public Evaluator(PrintStream out) {
     this.out = out;
@@ -51,15 +57,17 @@ public class Evaluator {
   }
 
   public void run(Program program) {
-    for (final var stmt : program.stmts()) {
-      execute(stmt);
+    for (final var decl : program.decls()) {
+      execute(decl);
     }
   }
 
-  public void execute(Stmt stmt) {
-    switch (stmt) {
+  public void execute(Decl decl) {
+    switch (decl) {
       case ExprStmt(int line, Expr e) -> evaluate(e);
       case PrintStmt(int line, Expr e) -> out.println(evaluate(e));
+      case VarDecl(int line, String name, Optional<Expr> init) ->
+          env.defineGlobal(name, init.map(this::evaluate).orElse(NIL));
     }
   }
 
@@ -70,6 +78,7 @@ public class Evaluator {
       case NumExpr(int line, double value) -> new NumValue(value);
       case NilExpr(int line) -> new NilValue();
       case Grouping(int line, Expr e) -> evaluate(e);
+      case VarExpr(int line, String name) -> env.get(name);
 
       case UnaryExpr(int line, UnaryOp op, Expr e) -> switch (op) {
         case BANG -> new BoolValue(!isTruthy(e));

@@ -77,16 +77,16 @@ public class Main {
         final var scanner = new Scanner(in);
         final var parser = new Parser(scanner);
         final var evaluator = new Evaluator(env.out);
-          while (!parser.eof()) {
-            try {
+        while (!parser.eof()) {
+          try {
             final var expr = parser.expr();
             final var value = evaluator.evaluate(expr);
             env.out.println(value);
-        } catch (LoxError e) {
-          env.err.println(e.getMessage());
-          return e.code();
-        }
+          } catch (LoxError e) {
+            env.err.println(e.getMessage());
+            return e.code();
           }
+        }
         return SUCCESS;
       }
 
@@ -99,14 +99,12 @@ public class Main {
         final var scanner = new Scanner(in);
         final var parser = new Parser(scanner);
         final var evaluator = new Evaluator(env.out);
-        while (!parser.eof()) {
-          try {
-            final var expr = parser.stmt();
-            evaluator.execute(expr);
-          } catch (LoxError e) {
-            env.err.println(e.getMessage());
-            return e.code();
-          }
+        try {
+          final var program = parser.program();
+          evaluator.run(program);
+        } catch (LoxError e) {
+          env.err.println(e.getMessage());
+          return e.code();
         }
         return SUCCESS;
       }

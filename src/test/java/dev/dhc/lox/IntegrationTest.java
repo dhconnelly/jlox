@@ -77,6 +77,7 @@ public class IntegrationTest {
   @ParameterizedTest
   @ValueSource(strings = {
       "inputs/interpreter/statements.lox",
+      "inputs/interpreter/undefined_error.lox",
   })
   void testInterpreter(String resource) throws IOException {
     expect.scenario(resource).toMatchSnapshot(execute("interpret", resourcePath(resource)));

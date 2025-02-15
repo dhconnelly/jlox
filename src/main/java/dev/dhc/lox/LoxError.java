@@ -8,6 +8,11 @@ public sealed abstract class LoxError extends RuntimeException {
     this.code = code;
   }
 
+  public LoxError(int code, String message) {
+    super(String.format("Error: %s", message));
+    this.code = code;
+  }
+
   public int code() { return code; }
 
   public static final class SyntaxError extends LoxError {
@@ -19,6 +24,9 @@ public sealed abstract class LoxError extends RuntimeException {
   public static final class RuntimeError extends LoxError {
     public RuntimeError(int line, String message) {
       super(70, line, message);
+    }
+    public RuntimeError(String message) {
+      super(70, message);
     }
   }
 }
