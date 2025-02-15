@@ -1,5 +1,6 @@
 package dev.dhc.lox;
 
+import dev.dhc.lox.LoxError.SyntaxError;
 import dev.dhc.lox.Token.Literal;
 import dev.dhc.lox.Token.NumberLiteral;
 import dev.dhc.lox.Token.StringLiteral;
@@ -95,12 +96,12 @@ public class Scanner {
     lookahead.add(new Token(line, type, current.toString(), Optional.empty()));
   }
 
-  private void emit(Type type, Literal literal) {
+  private void emit(Type type, Literal<?> literal) {
     lookahead.add(new Token(line, type, current.toString(), Optional.of(literal)));
   }
 
   private void error(String message) {
-    throw new LoxError(line, message);
+    throw new SyntaxError(line, message);
   }
 
   private boolean isDigit(int c) {

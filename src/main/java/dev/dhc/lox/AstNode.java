@@ -1,6 +1,6 @@
 package dev.dhc.lox;
 
-public interface AstNode {
+public sealed interface AstNode {
   int line();
 
   enum BinOp {

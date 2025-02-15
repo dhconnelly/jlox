@@ -15,10 +15,14 @@ import java.nio.file.Paths;
 public class Main {
   public record Environment(InputStream in, PrintStream out, PrintStream err) {}
 
+  private static final int SUCCESS = 0;
+  private static final int FAILURE = 1;
+  private static final int USAGE_ERROR = 64;
+
   public static int run(Environment env, String[] args) throws IOException {
     if (args.length == 0) {
       env.err.println("usage: lox COMMAND [ARG...]");
-      return 64;
+      return USAGE_ERROR;
     }
 
     final var command = args[0];
@@ -26,11 +30,11 @@ public class Main {
       case "tokenize" -> {
         if (args.length != 2) {
           env.err.println("usage: lox tokenize FILE");
-          return 64;
+          return USAGE_ERROR;
         }
         final var in = Files.newInputStream(Paths.get(args[1]));
         final var scanner = new Scanner(in);
-        boolean hadError = false;
+        int code = SUCCESS;
         while (true) {
           try {
             final var token = scanner.nextToken();
@@ -38,16 +42,16 @@ public class Main {
             if (token.type() == Type.EOF) break;
           } catch (LoxError e) {
             env.err.println(e.getMessage());
-            hadError = true;
+            code = e.code();
           }
         }
-        return hadError ? 65 : 0;
+        return code;
       }
 
       case "parse" -> {
         if (args.length != 2) {
           env.err.println("usage: lox parse FILE");
-          return 64;
+          return USAGE_ERROR;
         }
         final var in = Files.newInputStream(Paths.get(args[1]));
         final var scanner = new Scanner(in);
@@ -57,11 +61,33 @@ public class Main {
             final var expr = parser.expr();
             env.out.println(expr);
           }
-          return 0;
+          return SUCCESS;
         } catch (LoxError e) {
           env.err.println(e.getMessage());
-          return 65;
+          return e.code();
         }
+      }
+
+      case "evaluate" -> {
+        if (args.length != 2) {
+          env.err.println("usage: lox evaluate FILE");
+          return USAGE_ERROR;
+        }
+        final var in = Files.newInputStream(Paths.get(args[1]));
+        final var scanner = new Scanner(in);
+        final var parser = new Parser(scanner);
+        final var evaluator = new Evaluator();
+        try {
+          while (!parser.eof()) {
+            final var expr = parser.expr();
+            final var value = evaluator.evaluate(expr);
+            env.out.println(value);
+          }
+        } catch (LoxError e) {
+          env.err.println(e.getMessage());
+          return e.code();
+        }
+        return SUCCESS;
       }
 
       case "repl" -> {
@@ -83,13 +109,13 @@ public class Main {
             hadError = true;
           }
         }
-        return hadError ? 65 : 0;
+        return hadError ? FAILURE : SUCCESS;
       }
 
       case "run" -> {
         if (args.length != 2) {
           env.err.println("usage: lox run FILE");
-          return 64;
+          return USAGE_ERROR;
         }
         final var in = Files.newInputStream(Paths.get(args[1]));
         final var scanner = new Scanner(in);
@@ -101,14 +127,14 @@ public class Main {
           }
         } catch (LoxError e) {
           env.err.println(e.getMessage());
-          return 65;
+          return e.code();
         }
-        return 0;
+        return SUCCESS;
       }
 
       default -> {
         env.err.println("unrecognized command: " + command);
-        return 64;
+        return USAGE_ERROR;
       }
     }
   }

@@ -1,7 +1,24 @@
 package dev.dhc.lox;
 
-public class LoxError extends RuntimeException {
-  public LoxError(int line, String message) {
+public sealed abstract class LoxError extends RuntimeException {
+  private final int code;
+
+  public LoxError(int code, int line, String message) {
     super(String.format("[line %d] Error: %s", line, message));
+    this.code = code;
+  }
+
+  public int code() { return code; }
+
+  public static final class SyntaxError extends LoxError {
+    public SyntaxError(int line, String message) {
+      super(65, line, message);
+    }
+  }
+
+  public final class RuntimeError extends LoxError {
+    public RuntimeError(int line, String message) {
+      super(70, line, message);
+    }
   }
 }

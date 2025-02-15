@@ -23,9 +23,9 @@ import dev.dhc.lox.AstNode.NumExpr;
 import dev.dhc.lox.AstNode.StrExpr;
 import dev.dhc.lox.AstNode.UnaryExpr;
 import dev.dhc.lox.AstNode.UnaryOp;
+import dev.dhc.lox.LoxError.SyntaxError;
 import dev.dhc.lox.Token.Type;
 import java.io.IOException;
-import java.util.Arrays;
 
 public class Parser {
   private final Scanner scanner;
@@ -70,7 +70,7 @@ public class Parser {
       case MINUS -> BinOp.MINUS;
       case SLASH -> BinOp.SLASH;
       case STAR -> BinOp.STAR;
-      default -> throw new LoxError(tok.line(), "Expected binop.");
+      default -> throw new SyntaxError(tok.line(), "Expected binop.");
     };
   }
 
@@ -118,7 +118,7 @@ public class Parser {
     return switch (tok.type()) {
       case BANG -> UnaryOp.BANG;
       case MINUS -> UnaryOp.MINUS;
-      default -> throw new LoxError(tok.line(), "Expected unary op.");
+      default -> throw new SyntaxError(tok.line(), "Expected unary op.");
     };
   }
 
@@ -133,7 +133,7 @@ public class Parser {
   }
 
   private void eat(Type type, String message) throws IOException {
-    if (!peekIs(type)) throw new LoxError(peek().line(), message);
+    if (!peekIs(type)) throw new SyntaxError(peek().line(), message);
     next();
   }
 
@@ -151,7 +151,7 @@ public class Parser {
         eat(RIGHT_PAREN, "Expect ')' after expression.");
         yield new Grouping(tok.line(), expr);
       }
-      default -> throw new LoxError(tok.line(), "Expect expression.");
+      default -> throw new SyntaxError(tok.line(), "Expect expression.");
     };
   }
 }
