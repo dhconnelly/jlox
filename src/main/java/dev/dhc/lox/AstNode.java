@@ -56,6 +56,11 @@ public sealed interface AstNode {
       return name;
     }
   }
+  record AssignExpr(int line, String name, Expr e) implements Expr {
+    @Override public String toString() {
+      return String.format("(assign %s %s)", name, e);
+    }
+  }
 
   sealed interface Decl extends AstNode {}
   record VarDecl(int line, String name, Optional<Expr> init) implements Decl {}

@@ -7,8 +7,9 @@ import java.util.Map;
 public class Environment {
   private final Map<String, Value> globals = new HashMap<>();
 
-  public void defineGlobal(String name, Value value) {
+  public Value defineGlobal(String name, Value value) {
     globals.put(name, value);
+    return value;
   }
 
   public Value get(String name) {

@@ -1,5 +1,6 @@
 package dev.dhc.lox;
 
+import dev.dhc.lox.AstNode.AssignExpr;
 import dev.dhc.lox.AstNode.BinOp;
 import dev.dhc.lox.AstNode.BinaryExpr;
 import dev.dhc.lox.AstNode.BoolExpr;
@@ -79,6 +80,7 @@ public class Evaluator {
       case NilExpr(int line) -> new NilValue();
       case Grouping(int line, Expr e) -> evaluate(e);
       case VarExpr(int line, String name) -> env.get(name);
+      case AssignExpr(int line, String name, Expr e) -> env.defineGlobal(name, evaluate(e));
 
       case UnaryExpr(int line, UnaryOp op, Expr e) -> switch (op) {
         case BANG -> new BoolValue(!isTruthy(e));

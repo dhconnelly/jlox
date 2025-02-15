@@ -89,7 +89,9 @@ dev.dhc.lox.IntegrationTest.testInterpreter[inputs/interpreter/statements.lox]=[
       "nil",
       "false",
       "5",
-      "nil"
+      "nil",
+      "9",
+      "foo"
     ],
     "errLines": [ ]
   }
@@ -131,7 +133,8 @@ dev.dhc.lox.IntegrationTest.testParser[inputs/parser/expressions.lox]=[
       "(- (+ 52.0 80.0) 94.0)",
       "(< (< 83.0 99.0) 115.0)",
       "(== baz baz)",
-      "foo"
+      "foo",
+      "(assign x (+ y 7.0))"
     ],
     "errLines": [ ]
   }

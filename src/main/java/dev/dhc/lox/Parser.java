@@ -17,6 +17,7 @@ import static dev.dhc.lox.Token.Type.SLASH;
 import static dev.dhc.lox.Token.Type.STAR;
 import static dev.dhc.lox.Token.Type.VAR;
 
+import dev.dhc.lox.AstNode.AssignExpr;
 import dev.dhc.lox.AstNode.BinOp;
 import dev.dhc.lox.AstNode.BinaryExpr;
 import dev.dhc.lox.AstNode.BoolExpr;
@@ -65,10 +66,6 @@ public class Parser {
       if (type == tok.type()) return true;
     }
     return false;
-  }
-
-  public Expr expr() throws IOException {
-    return equality();
   }
 
   public Stmt stmt() throws IOException {
@@ -126,6 +123,24 @@ public class Parser {
       case STAR -> BinOp.STAR;
       default -> throw new SyntaxError(tok.line(), "Expected binop.");
     };
+  }
+
+  public Expr expr() throws IOException {
+    return assignment();
+  }
+
+  public Expr assignment() throws IOException {
+    final var expr = equality();
+    if (peekIs(EQUAL)) {
+      next();
+      final var binding = expr();
+      if (expr instanceof VarExpr(int line, String name)) {
+        return new AssignExpr(line, name, binding);
+      } else {
+        throw new SyntaxError(expr.line(), String.format("Invalid assignment target: %s", expr));
+      }
+    }
+    return expr;
   }
 
   private Expr equality() throws IOException {
