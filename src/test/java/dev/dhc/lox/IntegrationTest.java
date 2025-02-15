@@ -41,46 +41,46 @@ public class IntegrationTest {
 
   @ParameterizedTest
   @ValueSource(strings = {
-      "inputs/scanner/test.lox",
-      "inputs/scanner/empty.lox",
-      "inputs/scanner/tokens.lox",
-      "inputs/scanner/scanner_errors.lox"
+      "inputs/tokenize/test.lox",
+      "inputs/tokenize/empty.lox",
+      "inputs/tokenize/tokens.lox",
+      "inputs/tokenize/scanner_errors.lox"
   })
-  void testScanner(String resource) throws IOException {
+  void testTokenize(String resource) throws IOException {
     expect.scenario(resource).toMatchSnapshot(execute("tokenize", resourcePath(resource)));
   }
 
   @ParameterizedTest
   @ValueSource(strings = {
-      "inputs/parser/test.lox",
-      "inputs/parser/empty.lox",
-      "inputs/parser/expressions.lox",
-      "inputs/parser/values.lox",
-      "inputs/parser/parser_errors.lox",
+      "inputs/parse/test.lox",
+      "inputs/parse/empty.lox",
+      "inputs/parse/expressions.lox",
+      "inputs/parse/values.lox",
+      "inputs/parse/parser_errors.lox",
   })
-  void testParser(String resource) throws IOException {
+  void testParse(String resource) throws IOException {
     expect.scenario(resource).toMatchSnapshot(execute("parse", resourcePath(resource)));
   }
 
   @ParameterizedTest
   @ValueSource(strings = {
-      "inputs/evaluator/empty.lox",
-      "inputs/evaluator/values.lox",
-      "inputs/evaluator/unary_error.lox",
-      "inputs/evaluator/plus_bad_types_error.lox",
-      "inputs/evaluator/plus_same_types_error.lox",
+      "inputs/evaluate/empty.lox",
+      "inputs/evaluate/values.lox",
+      "inputs/evaluate/unary_error.lox",
+      "inputs/evaluate/plus_bad_types_error.lox",
+      "inputs/evaluate/plus_same_types_error.lox",
   })
-  void testEvaluator(String resource) throws IOException {
+  void testEvaluate(String resource) throws IOException {
     expect.scenario(resource).toMatchSnapshot(execute("evaluate", resourcePath(resource)));
   }
 
   @ParameterizedTest
   @ValueSource(strings = {
-      "inputs/interpreter/statements.lox",
-      "inputs/interpreter/undefined_error.lox",
-      "inputs/interpreter/scope.lox",
+      "inputs/interpret/statements.lox",
+      "inputs/interpret/undefined_error.lox",
+      "inputs/interpret/scope.lox",
   })
-  void testInterpreter(String resource) throws IOException {
+  void testInterpret(String resource) throws IOException {
     expect.scenario(resource).toMatchSnapshot(execute("interpret", resourcePath(resource)));
   }
 }

@@ -1,4 +1,4 @@
-dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/empty.lox]=[
+dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/empty.lox]=[
   {
     "code": 0,
     "outLines": [ ],
@@ -7,7 +7,7 @@ dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/empty.lox]=[
 ]
 
 
-dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/plus_bad_types_error.lox]=[
+dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/plus_bad_types_error.lox]=[
   {
     "code": 70,
     "outLines": [ ],
@@ -18,7 +18,7 @@ dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/plus_bad_types_error.
 ]
 
 
-dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/plus_same_types_error.lox]=[
+dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/plus_same_types_error.lox]=[
   {
     "code": 70,
     "outLines": [ ],
@@ -29,7 +29,7 @@ dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/plus_same_types_error
 ]
 
 
-dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/unary_error.lox]=[
+dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/unary_error.lox]=[
   {
     "code": 70,
     "outLines": [ ],
@@ -40,7 +40,7 @@ dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/unary_error.lox]=[
 ]
 
 
-dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/values.lox]=[
+dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/values.lox]=[
   {
     "code": 0,
     "outLines": [
@@ -79,7 +79,7 @@ dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/values.lox]=[
 ]
 
 
-dev.dhc.lox.IntegrationTest.testInterpreter[inputs/interpreter/scope.lox]=[
+dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/scope.lox]=[
   {
     "code": 0,
     "outLines": [
@@ -105,7 +105,7 @@ dev.dhc.lox.IntegrationTest.testInterpreter[inputs/interpreter/scope.lox]=[
 ]
 
 
-dev.dhc.lox.IntegrationTest.testInterpreter[inputs/interpreter/statements.lox]=[
+dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/statements.lox]=[
   {
     "code": 0,
     "outLines": [
@@ -124,7 +124,7 @@ dev.dhc.lox.IntegrationTest.testInterpreter[inputs/interpreter/statements.lox]=[
 ]
 
 
-dev.dhc.lox.IntegrationTest.testInterpreter[inputs/interpreter/undefined_error.lox]=[
+dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/undefined_error.lox]=[
   {
     "code": 70,
     "outLines": [ ],
@@ -135,7 +135,7 @@ dev.dhc.lox.IntegrationTest.testInterpreter[inputs/interpreter/undefined_error.l
 ]
 
 
-dev.dhc.lox.IntegrationTest.testParser[inputs/parser/empty.lox]=[
+dev.dhc.lox.IntegrationTest.testParse[inputs/parse/empty.lox]=[
   {
     "code": 0,
     "outLines": [ ],
@@ -144,7 +144,7 @@ dev.dhc.lox.IntegrationTest.testParser[inputs/parser/empty.lox]=[
 ]
 
 
-dev.dhc.lox.IntegrationTest.testParser[inputs/parser/expressions.lox]=[
+dev.dhc.lox.IntegrationTest.testParse[inputs/parse/expressions.lox]=[
   {
     "code": 0,
     "outLines": [
@@ -167,7 +167,7 @@ dev.dhc.lox.IntegrationTest.testParser[inputs/parser/expressions.lox]=[
 ]
 
 
-dev.dhc.lox.IntegrationTest.testParser[inputs/parser/parser_errors.lox]=[
+dev.dhc.lox.IntegrationTest.testParse[inputs/parse/parser_errors.lox]=[
   {
     "code": 0,
     "outLines": [ ],
@@ -176,7 +176,7 @@ dev.dhc.lox.IntegrationTest.testParser[inputs/parser/parser_errors.lox]=[
 ]
 
 
-dev.dhc.lox.IntegrationTest.testParser[inputs/parser/test.lox]=[
+dev.dhc.lox.IntegrationTest.testParse[inputs/parse/test.lox]=[
   {
     "code": 65,
     "outLines": [ ],
@@ -187,7 +187,7 @@ dev.dhc.lox.IntegrationTest.testParser[inputs/parser/test.lox]=[
 ]
 
 
-dev.dhc.lox.IntegrationTest.testParser[inputs/parser/values.lox]=[
+dev.dhc.lox.IntegrationTest.testParse[inputs/parse/values.lox]=[
   {
     "code": 0,
     "outLines": [
@@ -221,7 +221,7 @@ dev.dhc.lox.IntegrationTest.testParser[inputs/parser/values.lox]=[
 ]
 
 
-dev.dhc.lox.IntegrationTest.testScanner[inputs/scanner/empty.lox]=[
+dev.dhc.lox.IntegrationTest.testTokenize[inputs/tokenize/empty.lox]=[
   {
     "code": 0,
     "outLines": [
@@ -232,7 +232,7 @@ dev.dhc.lox.IntegrationTest.testScanner[inputs/scanner/empty.lox]=[
 ]
 
 
-dev.dhc.lox.IntegrationTest.testScanner[inputs/scanner/scanner_errors.lox]=[
+dev.dhc.lox.IntegrationTest.testTokenize[inputs/tokenize/scanner_errors.lox]=[
   {
     "code": 65,
     "outLines": [
@@ -246,7 +246,7 @@ dev.dhc.lox.IntegrationTest.testScanner[inputs/scanner/scanner_errors.lox]=[
 ]
 
 
-dev.dhc.lox.IntegrationTest.testScanner[inputs/scanner/test.lox]=[
+dev.dhc.lox.IntegrationTest.testTokenize[inputs/tokenize/test.lox]=[
   {
     "code": 0,
     "outLines": [
@@ -262,7 +262,7 @@ dev.dhc.lox.IntegrationTest.testScanner[inputs/scanner/test.lox]=[
 ]
 
 
-dev.dhc.lox.IntegrationTest.testScanner[inputs/scanner/tokens.lox]=[
+dev.dhc.lox.IntegrationTest.testTokenize[inputs/tokenize/tokens.lox]=[
   {
     "code": 0,
     "outLines": [
