@@ -56,6 +56,7 @@ public class IntegrationTest {
       "inputs/parser/test.lox",
       "inputs/parser/empty.lox",
       "inputs/parser/expressions.lox",
+      "inputs/parser/values.lox",
       "inputs/parser/parser_errors.lox",
   })
   void testParser(String resource) throws IOException {

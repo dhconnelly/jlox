@@ -16,7 +16,7 @@ public sealed abstract class LoxError extends RuntimeException {
     }
   }
 
-  public final class RuntimeError extends LoxError {
+  public static final class RuntimeError extends LoxError {
     public RuntimeError(int line, String message) {
       super(70, line, message);
     }
