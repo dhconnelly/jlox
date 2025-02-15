@@ -97,6 +97,22 @@ dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/values.lox]=[
 ]
 
 
+dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/control_flow.lox]=[
+  {
+    "code": 0,
+    "outLines": [
+      "ok 1",
+      "ok 2",
+      "ok 3",
+      "ok 4",
+      "ok 5",
+      "ok 6"
+    ],
+    "errLines": [ ]
+  }
+]
+
+
 dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/scope.lox]=[
   {
     "code": 0,

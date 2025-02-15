@@ -1,0 +1,32 @@
+if (true) {
+  print "ok 1";
+}
+
+if (false) {
+  print "fail";
+}
+
+var x = 1;
+var y = "a";
+var z = 2;
+if (x == y) {
+  print "fail";
+} else {
+  print "ok 2";
+}
+if (x + 1 == z) {
+  print "ok 3";
+} else {
+  print "fail";
+}
+
+if (false) {
+  print "fail";
+} else if (false) {
+  print "fail";
+} else {
+  print "ok 4";
+}
+
+if (true) print "ok 5";
+if (false) print "fail"; else print "ok 6";

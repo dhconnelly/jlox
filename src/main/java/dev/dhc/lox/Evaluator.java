@@ -8,6 +8,7 @@ import dev.dhc.lox.AstNode.BoolExpr;
 import dev.dhc.lox.AstNode.Expr;
 import dev.dhc.lox.AstNode.ExprStmt;
 import dev.dhc.lox.AstNode.Grouping;
+import dev.dhc.lox.AstNode.IfElseStmt;
 import dev.dhc.lox.AstNode.NilExpr;
 import dev.dhc.lox.AstNode.NumExpr;
 import dev.dhc.lox.AstNode.PrintStmt;
@@ -91,6 +92,10 @@ public class Evaluator {
           env.define(name, init.map(this::evaluate).orElse(NIL));
       case BlockStmt(_, List<Stmt> stmts) ->
           executeBlock(stmts, new Environment(env));
+      case IfElseStmt(_, Expr cond, Stmt conseq, Optional<Stmt> alt) -> {
+        if (asBool(cond)) execute(conseq);
+        else alt.ifPresent(this::execute);
+      }
     }
   }
 

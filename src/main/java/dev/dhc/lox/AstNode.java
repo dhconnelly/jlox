@@ -68,6 +68,7 @@ public sealed interface AstNode {
   record ExprStmt(int line, Expr expr) implements Stmt {}
   record PrintStmt(int line, Expr expr) implements Stmt {}
   record BlockStmt(int line, List<Stmt> stmts) implements Stmt {}
+  record IfElseStmt(int line, Expr cond, Stmt conseq, Optional<Stmt> alt) implements Stmt {}
 
   record Program(List<Stmt> stmts) {}
 }

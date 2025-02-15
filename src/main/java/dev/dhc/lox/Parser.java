@@ -3,12 +3,14 @@ package dev.dhc.lox;
 import static dev.dhc.lox.Token.Type.AND;
 import static dev.dhc.lox.Token.Type.BANG;
 import static dev.dhc.lox.Token.Type.BANG_EQUAL;
+import static dev.dhc.lox.Token.Type.ELSE;
 import static dev.dhc.lox.Token.Type.EQUAL;
 import static dev.dhc.lox.Token.Type.EQUAL_EQUAL;
 import static dev.dhc.lox.Token.Type.GREATER;
 import static dev.dhc.lox.Token.Type.GREATER_EQUAL;
 import static dev.dhc.lox.Token.Type.IDENTIFIER;
 import static dev.dhc.lox.Token.Type.LEFT_BRACE;
+import static dev.dhc.lox.Token.Type.LEFT_PAREN;
 import static dev.dhc.lox.Token.Type.LESS;
 import static dev.dhc.lox.Token.Type.LESS_EQUAL;
 import static dev.dhc.lox.Token.Type.MINUS;
@@ -29,6 +31,7 @@ import dev.dhc.lox.AstNode.BoolExpr;
 import dev.dhc.lox.AstNode.Expr;
 import dev.dhc.lox.AstNode.ExprStmt;
 import dev.dhc.lox.AstNode.Grouping;
+import dev.dhc.lox.AstNode.IfElseStmt;
 import dev.dhc.lox.AstNode.NilExpr;
 import dev.dhc.lox.AstNode.NumExpr;
 import dev.dhc.lox.AstNode.PrintStmt;
@@ -76,22 +79,38 @@ public class Parser {
     eat(LEFT_BRACE, "Expected '{'");
     final var stmts = new ArrayList<Stmt>();
     while (!eof() && !peekIs(RIGHT_BRACE)) {
-      stmts.add(stmtOrDecl());
+      stmts.add(stmt());
     }
     eat(RIGHT_BRACE, "Expected '}'");
     return stmts;
   }
 
-  private Stmt stmt() {
+  private Stmt innerStmt() {
     final var tok = peek();
     return switch (tok.type()) {
+      case LEFT_BRACE -> new BlockStmt(tok.line(), block());
+
       case PRINT -> {
         next();
         final var e = expr();
         eat(SEMICOLON, "Expected ; after expression");
         yield new PrintStmt(tok.line(), e);
       }
-      case LEFT_BRACE -> new BlockStmt(tok.line(), block());
+
+      case IF -> {
+        next();
+        eat(LEFT_PAREN, "Expect '('");
+        var cond = expr();
+        eat(RIGHT_PAREN, "Expect '('");
+        var conseq = innerStmt();
+        var alt = Optional.<Stmt>empty();
+        if (peekIs(ELSE)) {
+          next();
+          alt = Optional.of(innerStmt());
+        }
+        yield new IfElseStmt(tok.line(), cond, conseq, alt);
+      }
+
       default -> {
         final var e = expr();
         eat(SEMICOLON, "Expected ; after expression");
@@ -100,7 +119,7 @@ public class Parser {
     };
   }
 
-  public Stmt stmtOrDecl() {
+  public Stmt stmt() {
     int line = peek().line();
     if (peekIs(VAR)) {
       next();
@@ -113,13 +132,13 @@ public class Parser {
       eat(SEMICOLON, "Expected ; after variable declaration");
       return new VarDecl(line, name, init);
     }
-    return stmt();
+    return innerStmt();
   }
 
   public Program program() {
     final var stmts = new ArrayList<Stmt>();
     while (!eof()) {
-      stmts.add(stmtOrDecl());
+      stmts.add(stmt());
     }
     return new Program(stmts);
   }

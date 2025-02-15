@@ -96,7 +96,7 @@ public class Driver {
             final var line = reader.readLine();
             if (line == null) break;
             final var stream = new ByteArrayInputStream(line.getBytes(StandardCharsets.UTF_8));
-            final var stmt = new Parser(new Scanner(stream)).stmtOrDecl();
+            final var stmt = new Parser(new Scanner(stream)).stmt();
             evaluator.execute(stmt);
           } catch (Exception e) {
             err.println(e.getMessage());
