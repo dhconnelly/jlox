@@ -3,8 +3,8 @@ package dev.dhc.lox;
 import dev.dhc.lox.AstNode.AssignExpr;
 import dev.dhc.lox.AstNode.BinOp;
 import dev.dhc.lox.AstNode.BinaryExpr;
+import dev.dhc.lox.AstNode.BlockStmt;
 import dev.dhc.lox.AstNode.BoolExpr;
-import dev.dhc.lox.AstNode.Decl;
 import dev.dhc.lox.AstNode.Expr;
 import dev.dhc.lox.AstNode.ExprStmt;
 import dev.dhc.lox.AstNode.Grouping;
@@ -24,12 +24,13 @@ import dev.dhc.lox.Value.NilValue;
 import dev.dhc.lox.Value.NumValue;
 import dev.dhc.lox.Value.StrValue;
 import java.io.PrintStream;
+import java.util.List;
 import java.util.Optional;
 
 public class Evaluator {
-  private final PrintStream out;
-  private final Environment env = new Environment();
   private static final Value NIL = new NilValue();
+  private final PrintStream out;
+  private Environment env = new Environment();
 
   public Evaluator(PrintStream out) {
     this.out = out;
@@ -37,8 +38,8 @@ public class Evaluator {
 
   private boolean isTruthy(Expr e) {
     return switch (e) {
-      case NilExpr nil -> false;
-      case BoolExpr(int line, boolean value) -> value;
+      case NilExpr _ -> false;
+      case BoolExpr(_, boolean value) -> value;
       default -> true;
     };
   }
@@ -58,35 +59,47 @@ public class Evaluator {
   }
 
   public void run(Program program) {
-    for (final var decl : program.decls()) {
-      execute(decl);
+    for (final var stmt : program.stmts()) {
+      execute(stmt);
     }
   }
 
-  public void execute(Decl decl) {
-    switch (decl) {
-      case ExprStmt(int line, Expr e) -> evaluate(e);
-      case PrintStmt(int line, Expr e) -> out.println(evaluate(e));
-      case VarDecl(int line, String name, Optional<Expr> init) ->
-          env.defineGlobal(name, init.map(this::evaluate).orElse(NIL));
+  private void executeBlock(List<Stmt> stmts, Environment env) {
+    final var prev = this.env;
+    try {
+      this.env = env;
+      for (var stmt : stmts) {
+        execute(stmt);
+      }
+    } finally {
+      this.env = prev;
+    }
+  }
+
+  public void execute(Stmt stmt) {
+    switch (stmt) {
+      case ExprStmt(_, Expr e) -> evaluate(e);
+      case PrintStmt(_, Expr e) -> out.println(evaluate(e));
+      case VarDecl(_, String name, Optional<Expr> init) ->
+          env.define(name, init.map(this::evaluate).orElse(NIL));
+      case BlockStmt(_, List<Stmt> stmts) ->
+          executeBlock(stmts, new Environment(env));
     }
   }
 
   public Value evaluate(Expr expr) {
     return switch (expr) {
-      case BoolExpr(int line, boolean value) -> new BoolValue(value);
-      case StrExpr(int line, String value) -> new StrValue(value);
-      case NumExpr(int line, double value) -> new NumValue(value);
-      case NilExpr(int line) -> new NilValue();
-      case Grouping(int line, Expr e) -> evaluate(e);
-      case VarExpr(int line, String name) -> env.get(name);
-      case AssignExpr(int line, String name, Expr e) -> env.defineGlobal(name, evaluate(e));
-
-      case UnaryExpr(int line, UnaryOp op, Expr e) -> switch (op) {
+      case BoolExpr(_, boolean value) -> new BoolValue(value);
+      case StrExpr(_, String value) -> new StrValue(value);
+      case NumExpr(_, double value) -> new NumValue(value);
+      case NilExpr(_) -> new NilValue();
+      case Grouping(_, Expr e) -> evaluate(e);
+      case VarExpr(_, String name) -> env.get(name);
+      case AssignExpr(_, String name, Expr e) -> env.assign(name, evaluate(e));
+      case UnaryExpr(_, UnaryOp op, Expr e) -> switch (op) {
         case BANG -> new BoolValue(!isTruthy(e));
         case MINUS -> new NumValue(-asNumber(e));
       };
-
       case BinaryExpr(int line, Expr left, BinOp op, Expr right) -> switch (op) {
         case PLUS -> switch (evaluate(left)) {
           case NumValue lhs -> new NumValue(lhs.value() + asNumber(right));
@@ -103,7 +116,6 @@ public class Evaluator {
         case BANG_EQUAL -> new BoolValue(!evaluate(left).equals(evaluate(right)));
         case EQUAL_EQUAL -> new BoolValue(evaluate(left).equals(evaluate(right)));
       };
-
       case null -> throw new AssertionError("expr cannot be null");
     };
   }

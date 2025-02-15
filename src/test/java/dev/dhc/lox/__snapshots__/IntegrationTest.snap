@@ -79,6 +79,32 @@ dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/values.lox]=[
 ]
 
 
+dev.dhc.lox.IntegrationTest.testInterpreter[inputs/interpreter/scope.lox]=[
+  {
+    "code": 0,
+    "outLines": [
+      "nil",
+      "7",
+      "nil",
+      "7",
+      "here",
+      "4",
+      "5",
+      "6",
+      "7",
+      "4",
+      "7",
+      "3",
+      "5",
+      "1",
+      "2",
+      "3"
+    ],
+    "errLines": [ ]
+  }
+]
+
+
 dev.dhc.lox.IntegrationTest.testInterpreter[inputs/interpreter/statements.lox]=[
   {
     "code": 0,

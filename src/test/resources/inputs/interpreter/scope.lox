@@ -1,0 +1,34 @@
+var x;
+var y;
+print x;
+x = 7;
+y = x;
+print x;
+var x;
+print x;
+print y;
+print "here";
+
+var x = 1;
+var y = 2;
+var z = 3;
+{
+  var x = 4;
+  var y = 5;
+  {
+    var z = 6;
+    print x;
+    print y;
+    print z;
+    y = 7;
+    print y;
+  }
+  print x;
+  print y;
+  print z;
+  y = 5;
+  print y;
+}
+print x;
+print y;
+print z;

@@ -78,6 +78,7 @@ public class IntegrationTest {
   @ValueSource(strings = {
       "inputs/interpreter/statements.lox",
       "inputs/interpreter/undefined_error.lox",
+      "inputs/interpreter/scope.lox",
   })
   void testInterpreter(String resource) throws IOException {
     expect.scenario(resource).toMatchSnapshot(execute("interpret", resourcePath(resource)));

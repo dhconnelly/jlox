@@ -62,11 +62,11 @@ public sealed interface AstNode {
     }
   }
 
-  sealed interface Decl extends AstNode {}
-  record VarDecl(int line, String name, Optional<Expr> init) implements Decl {}
-  sealed interface Stmt extends Decl {}
+  sealed interface Stmt extends AstNode {}
+  record VarDecl(int line, String name, Optional<Expr> init) implements Stmt {}
   record ExprStmt(int line, Expr expr) implements Stmt {}
   record PrintStmt(int line, Expr expr) implements Stmt {}
+  record BlockStmt(int line, List<Stmt> stmts) implements Stmt {}
 
-  record Program(List<Decl> decls) {}
+  record Program(List<Stmt> stmts) {}
 }

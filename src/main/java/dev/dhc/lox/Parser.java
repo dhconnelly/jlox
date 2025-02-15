@@ -7,10 +7,12 @@ import static dev.dhc.lox.Token.Type.EQUAL_EQUAL;
 import static dev.dhc.lox.Token.Type.GREATER;
 import static dev.dhc.lox.Token.Type.GREATER_EQUAL;
 import static dev.dhc.lox.Token.Type.IDENTIFIER;
+import static dev.dhc.lox.Token.Type.LEFT_BRACE;
 import static dev.dhc.lox.Token.Type.LESS;
 import static dev.dhc.lox.Token.Type.LESS_EQUAL;
 import static dev.dhc.lox.Token.Type.MINUS;
 import static dev.dhc.lox.Token.Type.PLUS;
+import static dev.dhc.lox.Token.Type.RIGHT_BRACE;
 import static dev.dhc.lox.Token.Type.RIGHT_PAREN;
 import static dev.dhc.lox.Token.Type.SEMICOLON;
 import static dev.dhc.lox.Token.Type.SLASH;
@@ -20,8 +22,8 @@ import static dev.dhc.lox.Token.Type.VAR;
 import dev.dhc.lox.AstNode.AssignExpr;
 import dev.dhc.lox.AstNode.BinOp;
 import dev.dhc.lox.AstNode.BinaryExpr;
+import dev.dhc.lox.AstNode.BlockStmt;
 import dev.dhc.lox.AstNode.BoolExpr;
-import dev.dhc.lox.AstNode.Decl;
 import dev.dhc.lox.AstNode.Expr;
 import dev.dhc.lox.AstNode.ExprStmt;
 import dev.dhc.lox.AstNode.Grouping;
@@ -39,6 +41,7 @@ import dev.dhc.lox.LoxError.SyntaxError;
 import dev.dhc.lox.Token.Type;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class Parser {
@@ -68,6 +71,16 @@ public class Parser {
     return false;
   }
 
+  private List<Stmt> block() throws IOException {
+    eat(LEFT_BRACE, "Expected '{'");
+    final var stmts = new ArrayList<Stmt>();
+    while (!eof() && !peekIs(RIGHT_BRACE)) {
+      stmts.add(decl());
+    }
+    eat(RIGHT_BRACE, "Expected '}'");
+    return stmts;
+  }
+
   public Stmt stmt() throws IOException {
     final var tok = peek();
     return switch (tok.type()) {
@@ -77,6 +90,7 @@ public class Parser {
         eat(SEMICOLON, "Expected ; after expression");
         yield new PrintStmt(tok.line(), e);
       }
+      case LEFT_BRACE -> new BlockStmt(tok.line(), block());
       default -> {
         final var e = expr();
         eat(SEMICOLON, "Expected ; after expression");
@@ -85,7 +99,7 @@ public class Parser {
     };
   }
 
-  public Decl decl() throws IOException {
+  public Stmt decl() throws IOException {
     int line = peek().line();
     if (peekIs(VAR)) {
       next();
@@ -102,11 +116,11 @@ public class Parser {
   }
 
   public Program program() throws IOException {
-    final var decls = new ArrayList<Decl>();
+    final var stmts = new ArrayList<Stmt>();
     while (!eof()) {
-      decls.add(decl());
+      stmts.add(decl());
     }
-    return new Program(decls);
+    return new Program(stmts);
   }
 
   private BinOp binOp(Token tok) {
