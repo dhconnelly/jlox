@@ -21,21 +21,21 @@ public class Evaluator {
     return switch (e) {
       case NilExpr nil -> true;
       case BoolExpr(int line, boolean value) -> value;
-      default -> false;
+      default -> true;
     };
   }
 
   private double asNumber(Expr e) {
     return switch (evaluate(e)) {
       case NumValue(double value) -> value;
-      default -> throw new RuntimeError(e.line(), String.format("type error: not a number: %s", e));
+      default -> throw new RuntimeError(e.line(), String.format("not a number: %s", e));
     };
   }
 
   private String asString(Expr e) {
     return switch (evaluate(e)) {
       case StrValue(String value) -> value;
-      default -> throw new RuntimeError(e.line(), String.format("type error: not a string: %s", e));
+      default -> throw new RuntimeError(e.line(), String.format("not a string: %s", e));
     };
   }
 

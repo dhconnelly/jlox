@@ -77,16 +77,16 @@ public class Main {
         final var scanner = new Scanner(in);
         final var parser = new Parser(scanner);
         final var evaluator = new Evaluator();
-        try {
           while (!parser.eof()) {
+            try {
             final var expr = parser.expr();
             final var value = evaluator.evaluate(expr);
             env.out.println(value);
-          }
         } catch (LoxError e) {
           env.err.println(e.getMessage());
           return e.code();
         }
+          }
         return SUCCESS;
       }
 

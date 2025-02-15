@@ -7,6 +7,39 @@ dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/empty.lox]=[
 ]
 
 
+dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/plus_bad_types_error.lox]=[
+  {
+    "code": 70,
+    "outLines": [ ],
+    "errLines": [
+      "[line 1] Error: operands to + must be both string or number"
+    ]
+  }
+]
+
+
+dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/plus_same_types_error.lox]=[
+  {
+    "code": 70,
+    "outLines": [ ],
+    "errLines": [
+      "[line 1] Error: not a string: 7.0"
+    ]
+  }
+]
+
+
+dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/unary_error.lox]=[
+  {
+    "code": 70,
+    "outLines": [ ],
+    "errLines": [
+      "[line 1] Error: not a number: foo"
+    ]
+  }
+]
+
+
 dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/values.lox]=[
   {
     "code": 0,
@@ -34,7 +67,12 @@ dev.dhc.lox.IntegrationTest.testEvaluator[inputs/evaluator/values.lox]=[
       "false",
       "true",
       "false",
-      "false"
+      "false",
+      "false",
+      "false",
+      "false",
+      "true",
+      "foobarbaz"
     ],
     "errLines": [ ]
   }

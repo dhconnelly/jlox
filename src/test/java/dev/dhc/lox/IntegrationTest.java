@@ -67,6 +67,9 @@ public class IntegrationTest {
   @ValueSource(strings = {
       "inputs/evaluator/empty.lox",
       "inputs/evaluator/values.lox",
+      "inputs/evaluator/unary_error.lox",
+      "inputs/evaluator/plus_bad_types_error.lox",
+      "inputs/evaluator/plus_same_types_error.lox",
   })
   void testEvaluator(String resource) throws IOException {
     expect.scenario(resource).toMatchSnapshot(execute("evaluate", resourcePath(resource)));
