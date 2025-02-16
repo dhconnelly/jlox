@@ -71,6 +71,7 @@ public class IntegrationTest {
       "inputs/evaluate/plus_bad_types_error.lox",
       "inputs/evaluate/plus_same_types_error.lox",
       "inputs/evaluate/control_flow.lox",
+      "inputs/evaluate/call_errors.lox",
   })
   void testEvaluate(String resource) {
     expect.scenario(resource).toMatchSnapshot(execute(new Evaluate(resourcePath(resource))));

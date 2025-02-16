@@ -1,3 +1,14 @@
+dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/call_errors.lox]=[
+  {
+    "code": 70,
+    "outLines": [ ],
+    "errLines": [
+      "[line 1] Error: foo: want CALLABLE, got STR"
+    ]
+  }
+]
+
+
 dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/control_flow.lox]=[
   {
     "code": 0,
@@ -90,7 +101,9 @@ dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/values.lox]=[
       "false",
       "true",
       "true",
-      "foobarbaz"
+      "foobarbaz",
+      "1.73974824323E9",
+      "<native fn>"
     ],
     "errLines": [ ]
   }

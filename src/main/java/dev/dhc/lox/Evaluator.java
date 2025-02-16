@@ -23,6 +23,8 @@ import dev.dhc.lox.AstNode.VarExpr;
 import dev.dhc.lox.AstNode.WhileStmt;
 import dev.dhc.lox.Error.RuntimeError;
 import dev.dhc.lox.Value.BoolValue;
+import dev.dhc.lox.Value.LoxCallable;
+import dev.dhc.lox.Value.LoxNativeFunction;
 import dev.dhc.lox.Value.NilValue;
 import dev.dhc.lox.Value.NumValue;
 import dev.dhc.lox.Value.StrValue;
@@ -34,14 +36,30 @@ import java.util.Optional;
 public class Evaluator {
   private static final Value NIL = new NilValue();
   private final PrintStream out;
-  private Environment env = new Environment();
+  private final Environment globals = new Environment();
+  private Environment env = globals;
 
   public Evaluator(PrintStream out) {
     this.out = out;
+    globals.define(
+        "clock",
+        new LoxNativeFunction(0, (_, _) ->
+            new NumValue((double) System.currentTimeMillis() / 1000.0)));
   }
 
   private RuntimeError typeError(Expr e, Type want, Value got) {
     return new RuntimeError(e.line(), String.format("%s: want %s, got %s", e, want, got.type()));
+  }
+
+  private RuntimeError arityError(int line, LoxCallable f, List<Value> args) {
+    return new RuntimeError(line, String.format("expected %d arguments, got %d", f.arity(), args.size()));
+  }
+
+  private LoxCallable asCallable(Expr e) {
+    return switch (evaluate(e)) {
+      case LoxCallable c -> c;
+      case Value v -> throw typeError(e, Type.CALLABLE, v);
+    };
   }
 
   private double asNumber(Expr e) {
@@ -139,9 +157,11 @@ public class Evaluator {
           yield isTruthy(lhs) ? lhs : evaluate(right);
         }
       };
-      case null -> throw new AssertionError("expr cannot be null");
       case CallExpr(_, Expr callee, List<Expr> args) -> {
-        throw new AssertionError();
+        final var f = asCallable(callee);
+        final var a = args.stream().map(this::evaluate).toList();
+        if (f.arity() != a.size()) throw arityError(callee.line(), f, a);
+        yield f.call(this, a);
       }
     };
   }

@@ -1,11 +1,16 @@
 package dev.dhc.lox;
 
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 public sealed interface Value {
   enum Type {
     NIL,
     BOOL,
     NUM,
     STR,
+    CALLABLE,
   }
 
   Type type();
@@ -28,5 +33,16 @@ public sealed interface Value {
   record StrValue(String value) implements Value {
     @Override public String toString() { return value; }
     @Override public Type type() { return Type.STR; }
+  }
+  sealed interface LoxCallable extends Value {
+    int arity();
+    Value call(Evaluator eval, List<Value> arguments);
+  }
+  record LoxNativeFunction(int arity, BiFunction<Evaluator, List<Value>, Value> f) implements LoxCallable {
+    @Override public String toString() { return "<native fn>"; }
+    @Override public Type type() { return Type.CALLABLE; }
+    @Override public Value call(Evaluator eval, List<Value> arguments) {
+      return f.apply(eval, arguments);
+    }
   }
 }
