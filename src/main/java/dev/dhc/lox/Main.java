@@ -15,7 +15,7 @@ public class Main {
       case "tokenize" -> new Command.Tokenize(path);
       case "parse" -> new Command.Parse(path);
       case "evaluate" -> new Command.Evaluate(path);
-      case "interpret" -> new Command.Run(path);
+      case "run" -> new Command.Run(path);
       default -> {
         System.err.println("invalid command");
         System.exit(Status.USAGE_ERROR.code());
