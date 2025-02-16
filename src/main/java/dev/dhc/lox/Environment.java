@@ -26,15 +26,20 @@ public class Environment {
   }
 
   public Value assign(String name, Value value) {
-    return Optional.ofNullable(values.get(name))
-        .map(ignored -> values.put(name, value))
-        .or(() -> up.map(parent -> parent.assign(name, value)))
-        .orElseThrow(() -> undefined(name));
+    if (values.containsKey(name)) {
+      values.put(name, value);
+      return value;
+    }
+    if (up.isPresent()) {
+      return up.get().assign(name, value);
+    }
+    throw undefined(name);
   }
 
   public Value get(String name) {
-    return Optional.ofNullable(values.get(name))
-        .or(() -> up.map(parent -> parent.get(name)))
-        .orElseThrow(() -> undefined(name));
+    final var value = values.get(name);
+    if (value != null) return value;
+    if (up.isPresent()) return up.get().get(name);
+    throw undefined(name);
   }
 }
