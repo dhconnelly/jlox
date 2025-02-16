@@ -64,3 +64,4 @@ print nil or "ok";
 print nil or false;
 print 5 and "foo";
 print nil and false;
+print 67 or true;

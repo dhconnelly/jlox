@@ -134,7 +134,7 @@ public class Evaluator {
           yield !isTruthy(lhs) ? lhs : evaluate(right);
         }
         case OR -> {
-          final var lhs = evaluate(right);
+          final var lhs = evaluate(left);
           yield isTruthy(lhs) ? lhs : evaluate(right);
         }
       };
