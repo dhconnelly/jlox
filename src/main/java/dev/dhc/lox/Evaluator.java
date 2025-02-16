@@ -40,9 +40,9 @@ public class Evaluator {
   }
 
   private boolean isTruthy(Expr e) {
-    return switch (e) {
-      case NilExpr _ -> false;
-      case BoolExpr(_, boolean value) -> value;
+    return switch (evaluate(e)) {
+      case NilValue() -> false;
+      case BoolValue(boolean value) -> value;
       default -> true;
     };
   }

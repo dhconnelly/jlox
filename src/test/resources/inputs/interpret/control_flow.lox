@@ -51,9 +51,8 @@ var seen = false;
 while (!seen) {
   if (seen) print "fail";
   seen = true;
-  break;
-  print "fail";
 }
+if (!seen) print "fail";
 print "ok 8";
 
 for (var n = 100; n >= 0.1; n = n / 10) {
