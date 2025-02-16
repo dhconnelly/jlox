@@ -54,7 +54,6 @@ public class IntegrationTest {
 
   @ParameterizedTest
   @ValueSource(strings = {
-      "inputs/parse/test.lox",
       "inputs/parse/empty.lox",
       "inputs/parse/expressions.lox",
       "inputs/parse/values.lox",

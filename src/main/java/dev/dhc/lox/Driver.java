@@ -9,7 +9,6 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Driver {
@@ -46,7 +45,7 @@ public class Driver {
   private Status runInternal(Command cmd) throws IOException {
     return switch (cmd) {
       case Command.Tokenize(var path) -> {
-        final var scanner = scan(Paths.get(path));
+        final var scanner = scanFile(path);
         var code = Status.SUCCESS;
         while (true) {
           try {
@@ -62,24 +61,24 @@ public class Driver {
       }
 
       case Command.Parse(var path) -> {
-        final var parser = new Parser(scan(Paths.get(path)));
-        while (!parser.eof()) {
-          out.println(parser.expr());
+        try (var reader = Files.newBufferedReader(Paths.get(path))) {
+          reader.lines().map(this::parse).map(Parser::expr).forEach(out::println);
         }
         yield Status.SUCCESS;
       }
 
       case Command.Evaluate(var path) -> {
-        final var parser = new Parser(scan(Paths.get(path)));
         final var evaluator = new Evaluator(out);
-        while (!parser.eof()) {
-          out.println(evaluator.evaluate(parser.expr()));
+        try (var reader = Files.newBufferedReader(Paths.get(path))) {
+          final var exprs = reader.lines().map(this::parse).map(Parser::expr);
+          final var values = exprs.map(evaluator::evaluate);
+          values.forEach(out::println);
         }
         yield Status.SUCCESS;
       }
 
       case Command.Run(var path) -> {
-        final var program = new Parser(scan(Paths.get(path))).program();
+        final var program = parseFile(path).program();
         final var evaluator = new Evaluator(out);
         for (var stmt : program.stmts()) {
           evaluator.execute(stmt);
@@ -95,8 +94,7 @@ public class Driver {
           try {
             final var line = reader.readLine();
             if (line == null) break;
-            final var stream = new ByteArrayInputStream(line.getBytes(StandardCharsets.UTF_8));
-            final var stmt = new Parser(new Scanner(stream)).stmt();
+            final var stmt = parse(line).stmt();
             out.println(stmt);
             evaluator.execute(stmt);
           } catch (Exception e) {
@@ -108,7 +106,16 @@ public class Driver {
     };
   }
 
-  private Scanner scan(Path path) throws IOException {
-    return new Scanner(Files.newInputStream(path));
+  private Scanner scanFile(String path) throws IOException {
+    return new Scanner(Files.newInputStream(Paths.get(path)));
+  }
+
+  private Parser parseFile(String path) throws IOException {
+    return new Parser(scanFile(path));
+  }
+
+  private Parser parse(String text) {
+    final var stream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
+    return new Parser(new Scanner(stream));
   }
 }

@@ -3,6 +3,7 @@ package dev.dhc.lox;
 import static dev.dhc.lox.Token.Type.AND;
 import static dev.dhc.lox.Token.Type.BANG;
 import static dev.dhc.lox.Token.Type.BANG_EQUAL;
+import static dev.dhc.lox.Token.Type.COMMA;
 import static dev.dhc.lox.Token.Type.ELSE;
 import static dev.dhc.lox.Token.Type.EQUAL;
 import static dev.dhc.lox.Token.Type.EQUAL_EQUAL;
@@ -28,6 +29,7 @@ import dev.dhc.lox.AstNode.BinOp;
 import dev.dhc.lox.AstNode.BinaryExpr;
 import dev.dhc.lox.AstNode.BlockStmt;
 import dev.dhc.lox.AstNode.BoolExpr;
+import dev.dhc.lox.AstNode.CallExpr;
 import dev.dhc.lox.AstNode.Expr;
 import dev.dhc.lox.AstNode.ExprStmt;
 import dev.dhc.lox.AstNode.Grouping;
@@ -50,6 +52,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class Parser {
+  private static final int MAX_ARGS = 255;
   private final Scanner scanner;
 
   public Parser(Scanner scanner) {
@@ -66,6 +69,11 @@ public class Parser {
 
   private Token peek() {
     return scanner.peekToken(0);
+  }
+
+  private Token eat(Type type, String message) {
+    if (!peekIs(type)) throw new SyntaxError(peek().line(), message);
+    return next();
   }
 
   private boolean peekIs(Type... types) {
@@ -284,12 +292,27 @@ public class Parser {
       final var rhs = unary();
       return new UnaryExpr(line, op, rhs);
     }
-    return primary();
+    return call();
   }
 
-  private Token eat(Type type, String message) {
-    if (!peekIs(type)) throw new SyntaxError(peek().line(), message);
-    return next();
+  private Expr call() {
+    var expr = primary();
+    while (peekIs(LEFT_PAREN)) {
+      next();
+      final var args = new ArrayList<Expr>();
+      while (!peekIs(RIGHT_PAREN)) {
+        if (!args.isEmpty()) {
+          eat(COMMA, "Expect ',' after argument");
+        }
+        if (args.size() >= MAX_ARGS) {
+          throw new SyntaxError(expr.line(), "Exceeded argument count limit");
+        }
+        args.add(expr());
+      }
+      eat(RIGHT_PAREN, "Expect ')' after arguments");
+      expr = new CallExpr(expr.line(), expr, args);
+    }
+    return expr;
   }
 
   private Expr primary() {

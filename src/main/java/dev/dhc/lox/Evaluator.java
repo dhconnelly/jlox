@@ -5,6 +5,7 @@ import dev.dhc.lox.AstNode.BinOp;
 import dev.dhc.lox.AstNode.BinaryExpr;
 import dev.dhc.lox.AstNode.BlockStmt;
 import dev.dhc.lox.AstNode.BoolExpr;
+import dev.dhc.lox.AstNode.CallExpr;
 import dev.dhc.lox.AstNode.Expr;
 import dev.dhc.lox.AstNode.ExprStmt;
 import dev.dhc.lox.AstNode.Grouping;
@@ -139,6 +140,9 @@ public class Evaluator {
         }
       };
       case null -> throw new AssertionError("expr cannot be null");
+      case CallExpr(_, Expr callee, List<Expr> args) -> {
+        throw new AssertionError();
+      }
     };
   }
 }
