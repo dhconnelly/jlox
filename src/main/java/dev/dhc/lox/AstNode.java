@@ -70,6 +70,7 @@ public sealed interface AstNode {
 
   sealed interface Stmt extends AstNode {}
   record VarDecl(int line, String name, Optional<Expr> init) implements Stmt {}
+  record FunDecl(int line, String name, List<String> params, List<Stmt> body) implements Stmt {}
   record ExprStmt(int line, Expr expr) implements Stmt {}
   record PrintStmt(int line, Expr expr) implements Stmt {}
   record BlockStmt(int line, List<Stmt> stmts) implements Stmt {}

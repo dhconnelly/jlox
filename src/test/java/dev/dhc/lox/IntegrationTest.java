@@ -83,6 +83,7 @@ public class IntegrationTest {
       "inputs/interpret/undefined_error.lox",
       "inputs/interpret/scope.lox",
       "inputs/interpret/control_flow.lox",
+      "inputs/interpret/functions.lox",
   })
   void testInterpret(String resource) {
     expect.scenario(resource).toMatchSnapshot(execute(new Run(resourcePath(resource))));

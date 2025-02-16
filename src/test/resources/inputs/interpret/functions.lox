@@ -1,0 +1,7 @@
+fun foo() {}
+print foo;
+print foo();
+
+fun println(thing) { print thing; }
+print println;
+println(println);

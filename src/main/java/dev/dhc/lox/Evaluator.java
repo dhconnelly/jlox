@@ -8,6 +8,7 @@ import dev.dhc.lox.AstNode.BoolExpr;
 import dev.dhc.lox.AstNode.CallExpr;
 import dev.dhc.lox.AstNode.Expr;
 import dev.dhc.lox.AstNode.ExprStmt;
+import dev.dhc.lox.AstNode.FunDecl;
 import dev.dhc.lox.AstNode.Grouping;
 import dev.dhc.lox.AstNode.IfElseStmt;
 import dev.dhc.lox.AstNode.NilExpr;
@@ -24,6 +25,7 @@ import dev.dhc.lox.AstNode.WhileStmt;
 import dev.dhc.lox.Error.RuntimeError;
 import dev.dhc.lox.Value.BoolValue;
 import dev.dhc.lox.Value.LoxCallable;
+import dev.dhc.lox.Value.LoxFunction;
 import dev.dhc.lox.Value.LoxNativeFunction;
 import dev.dhc.lox.Value.NilValue;
 import dev.dhc.lox.Value.NumValue;
@@ -102,6 +104,15 @@ public class Evaluator {
     }
   }
 
+  public Value call(LoxFunction f, List<Value> args) {
+    final var env = new Environment(globals);
+    for (int i = 0; i < args.size(); i++) {
+      env.define(f.params().get(i), args.get(i));
+    }
+    executeBlock(f.body(), env);
+    return NIL;
+  }
+
   public void execute(Stmt stmt) {
     switch (stmt) {
       case ExprStmt(_, Expr e) -> evaluate(e);
@@ -116,6 +127,10 @@ public class Evaluator {
       }
       case WhileStmt(_, Expr cond, Stmt body) -> {
         while (isTruthy(evaluate(cond))) execute(body);
+      }
+      case FunDecl(_, String name, List<String> params, List<Stmt> body) -> {
+        final var f = new LoxFunction(name, params, body);
+        env.define(name, f);
       }
     }
   }

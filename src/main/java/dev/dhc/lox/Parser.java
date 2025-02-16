@@ -7,6 +7,7 @@ import static dev.dhc.lox.Token.Type.COMMA;
 import static dev.dhc.lox.Token.Type.ELSE;
 import static dev.dhc.lox.Token.Type.EQUAL;
 import static dev.dhc.lox.Token.Type.EQUAL_EQUAL;
+import static dev.dhc.lox.Token.Type.FUN;
 import static dev.dhc.lox.Token.Type.GREATER;
 import static dev.dhc.lox.Token.Type.GREATER_EQUAL;
 import static dev.dhc.lox.Token.Type.IDENTIFIER;
@@ -32,6 +33,7 @@ import dev.dhc.lox.AstNode.BoolExpr;
 import dev.dhc.lox.AstNode.CallExpr;
 import dev.dhc.lox.AstNode.Expr;
 import dev.dhc.lox.AstNode.ExprStmt;
+import dev.dhc.lox.AstNode.FunDecl;
 import dev.dhc.lox.AstNode.Grouping;
 import dev.dhc.lox.AstNode.IfElseStmt;
 import dev.dhc.lox.AstNode.NilExpr;
@@ -169,8 +171,31 @@ public class Parser {
     return new VarDecl(line, name, init);
   }
 
+  public Stmt function() {
+    final var name = eat(IDENTIFIER, "Expect function name");
+    eat(LEFT_PAREN, "Expect '(' after function name");
+    final var params = new ArrayList<String>();
+    while (!peekIs(RIGHT_PAREN)) {
+      if (!params.isEmpty()) eat(COMMA, "Expect ',' after parameter");
+      if (params.size() > MAX_ARGS) {
+        throw new SyntaxError(name.line(), "Exceeded parameter count limit");
+      }
+      params.add(eat(IDENTIFIER, "Expect parameter name").cargo());
+    }
+    eat(RIGHT_PAREN, "Expect '(' after parameters");
+    final var body = block();
+    return new FunDecl(name.line(), name.cargo(), params, body);
+  }
+
+  public Stmt funDecl() {
+    eat(FUN, "Expect 'fun'");
+    return function();
+  }
+
   public Stmt stmt() {
-    return peekIs(VAR) ? varDecl() : innerStmt();
+    if (peekIs(VAR)) return varDecl();
+    if (peekIs(FUN)) return funDecl();
+    return innerStmt();
   }
 
   public Program program() {

@@ -1,5 +1,6 @@
 package dev.dhc.lox;
 
+import dev.dhc.lox.AstNode.Stmt;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -43,6 +44,14 @@ public sealed interface Value {
     @Override public Type type() { return Type.CALLABLE; }
     @Override public Value call(Evaluator eval, List<Value> arguments) {
       return f.apply(eval, arguments);
+    }
+  }
+  record LoxFunction(String name, List<String> params, List<Stmt> body) implements LoxCallable {
+    @Override public String toString() { return String.format("<fn \"%s\">", name); }
+    @Override public int arity() { return params.size(); }
+    @Override public Type type() { return Type.CALLABLE; }
+    @Override public Value call(Evaluator eval, List<Value> arguments) {
+      return eval.call(this, arguments);
     }
   }
 }
