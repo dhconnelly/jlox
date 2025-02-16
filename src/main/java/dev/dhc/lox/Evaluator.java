@@ -39,14 +39,6 @@ public class Evaluator {
     this.out = out;
   }
 
-  private boolean isTruthy(Expr e) {
-    return switch (evaluate(e)) {
-      case NilValue() -> false;
-      case BoolValue(boolean value) -> value;
-      default -> true;
-    };
-  }
-
   private RuntimeError typeError(Expr e, Type want, Value got) {
     return new RuntimeError(e.line(), String.format("%s: want %s, got %s", e, want, got.type()));
   }
@@ -65,10 +57,11 @@ public class Evaluator {
     };
   }
 
-  private boolean asBool(Expr e) {
-    return switch (evaluate(e)) {
+  private boolean isTruthy(Value v) {
+    return switch (v) {
+      case NilValue() -> false;
       case BoolValue(boolean value) -> value;
-      case Value v -> throw typeError(e, Type.BOOL, v);
+      default -> true;
     };
   }
 
@@ -99,11 +92,11 @@ public class Evaluator {
       case BlockStmt(_, List<Stmt> stmts) ->
           executeBlock(stmts, new Environment(env));
       case IfElseStmt(_, Expr cond, Stmt conseq, Optional<Stmt> alt) -> {
-        if (asBool(cond)) execute(conseq);
+        if (isTruthy(evaluate(cond))) execute(conseq);
         else alt.ifPresent(this::execute);
       }
       case WhileStmt(_, Expr cond, Stmt body) -> {
-        while (asBool(cond)) execute(body);
+        while (isTruthy(evaluate(cond))) execute(body);
       }
     }
   }
@@ -118,7 +111,7 @@ public class Evaluator {
       case VarExpr(_, String name) -> env.get(name);
       case AssignExpr(_, String name, Expr e) -> env.assign(name, evaluate(e));
       case UnaryExpr(_, UnaryOp op, Expr e) -> switch (op) {
-        case BANG -> new BoolValue(!isTruthy(e));
+        case BANG -> new BoolValue(!isTruthy(evaluate(e)));
         case MINUS -> new NumValue(-asNumber(e));
       };
       case BinaryExpr(int line, Expr left, BinOp op, Expr right) -> switch (op) {
@@ -136,8 +129,14 @@ public class Evaluator {
         case LESS_EQUAL -> new BoolValue(asNumber(left) <= asNumber(right));
         case BANG_EQUAL -> new BoolValue(!evaluate(left).equals(evaluate(right)));
         case EQUAL_EQUAL -> new BoolValue(evaluate(left).equals(evaluate(right)));
-        case AND -> new BoolValue(asBool(left) && asBool(right));
-        case OR -> new BoolValue(asBool(left) || asBool(right));
+        case AND -> {
+          final var lhs = evaluate(left);
+          yield !isTruthy(lhs) ? lhs : evaluate(right);
+        }
+        case OR -> {
+          final var lhs = evaluate(right);
+          yield isTruthy(lhs) ? lhs : evaluate(right);
+        }
       };
       case null -> throw new AssertionError("expr cannot be null");
     };

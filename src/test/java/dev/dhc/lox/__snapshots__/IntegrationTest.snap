@@ -8,7 +8,7 @@ dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/control_flow.lox]=[
       "false",
       "true",
       "false",
-      "true",
+      "false",
       "true"
     ],
     "errLines": [ ]
@@ -123,7 +123,11 @@ dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/control_flow.lox]=[
       "11",
       "2",
       "1.1",
-      "ok 9"
+      "ok 9",
+      "ok",
+      "false",
+      "foo",
+      "nil"
     ],
     "errLines": [ ]
   }
