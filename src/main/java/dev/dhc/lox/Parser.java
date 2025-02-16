@@ -116,7 +116,7 @@ public class Parser {
       case WHILE -> {
         next();
         eat(LEFT_PAREN, "Expect '('");
-        final var cond = expr();
+        final var cond = peekIs(RIGHT_PAREN) ? new NilExpr(line) : expr();
         eat(RIGHT_PAREN, "Expect '('");
         final var body = innerStmt();
         yield new WhileStmt(line, cond, body);
@@ -125,45 +125,44 @@ public class Parser {
       case FOR -> {
         next();
         eat(LEFT_PAREN, "Expect '('");
-        final var init = expr();
+        final var init = peekIs(VAR) ? varDecl() : exprStmt();
+        // already ate the first semicolon
+        final var cond = peekIs(SEMICOLON) ? new NilExpr(line) : expr();
         eat(SEMICOLON, "Expect ';'");
-        final var cond = expr();
-        eat(SEMICOLON, "Expect ';'");
-        final var iter = expr();
+        final var iter = new ExprStmt(line, peekIs(RIGHT_PAREN) ? new NilExpr(line) : expr());
         eat(RIGHT_PAREN, "Expect '('");
         final var body = innerStmt();
 
-        // desugar to while loop:
-        // 1. build a new block: first loop body, then iter
-        final var whileBody = new BlockStmt(line, List.of(body, new ExprStmt(iter.line(), iter)));
-        // 2. build a new loop without init
+        // desugar to while loop
+        final var whileBody = new BlockStmt(line, List.of(body, iter));
         final var whileLoop = new WhileStmt(line, cond, whileBody);
-        // 3. insert the init before the new loop
-        yield new BlockStmt(line, List.of(new ExprStmt(init.line(), init), whileLoop));
+        yield new BlockStmt(line, List.of(init, whileLoop));
       }
 
-      default -> {
-        final var e = expr();
-        eat(SEMICOLON, "Expected ; after expression");
-        yield new ExprStmt(line, e);
-      }
+      default -> exprStmt();
     };
   }
 
-  public Stmt stmt() {
-    int line = peek().line();
-    if (peekIs(VAR)) {
+  public Stmt exprStmt() {
+    final var e = peekIs(SEMICOLON) ? new NilExpr(peek().line()) : expr();
+    eat(SEMICOLON, "Expected ; after expression");
+    return new ExprStmt(e.line(), e);
+  }
+
+  public Stmt varDecl() {
+    final int line = eat(VAR, "Expected 'var'").line();
+    final var name = eat(IDENTIFIER, "Expected variable name").cargo();
+    var init = Optional.<Expr>empty();
+    if (peekIs(EQUAL)) {
       next();
-      final var name = eat(IDENTIFIER, "Expected variable name").cargo();
-      var init = Optional.<Expr>empty();
-      if (peekIs(EQUAL)) {
-        next();
-        init = Optional.of(expr());
-      }
-      eat(SEMICOLON, "Expected ; after variable declaration");
-      return new VarDecl(line, name, init);
+      init = Optional.of(expr());
     }
-    return innerStmt();
+    eat(SEMICOLON, "Expected ; after variable declaration");
+    return new VarDecl(line, name, init);
+  }
+
+  public Stmt stmt() {
+    return peekIs(VAR) ? varDecl() : innerStmt();
   }
 
   public Program program() {

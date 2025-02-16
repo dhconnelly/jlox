@@ -56,8 +56,7 @@ while (!seen) {
 }
 print "ok 8";
 
-var n;
-for (n = 100; n >= 0.1; n = n / 10) {
+for (var n = 100; n >= 0.1; n = n / 10) {
   print n + 1;
 }
 print "ok 9";
