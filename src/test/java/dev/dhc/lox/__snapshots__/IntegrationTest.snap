@@ -102,7 +102,6 @@ dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/values.lox]=[
       "true",
       "true",
       "foobarbaz",
-      "1.739750859191E9",
       "<native fn>"
     ],
     "errLines": [ ]

@@ -27,5 +27,4 @@ true != true
 !nil
 !false
 "foo" + "bar" + "baz"
-clock()
 clock
