@@ -48,7 +48,7 @@ public sealed interface Value {
   }
   record LoxFunction(String name, Environment closure, List<String> params, List<Stmt> body)
       implements LoxCallable {
-    @Override public String toString() { return String.format("<fn \"%s\">", name); }
+    @Override public String toString() { return String.format("<fn %s>", name); }
     @Override public int arity() { return params.size(); }
     @Override public Type type() { return Type.CALLABLE; }
     @Override public Value call(Evaluator eval, List<Value> arguments) {
