@@ -102,7 +102,7 @@ dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/values.lox]=[
       "true",
       "true",
       "foobarbaz",
-      "1.739749990548E9",
+      "1.739750418779E9",
       "<native fn>"
     ],
     "errLines": [ ]
@@ -155,7 +155,18 @@ dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/functions.lox]=[
       "<fn \"foo\">",
       "nil",
       "<fn \"println\">",
-      "<fn \"println\">"
+      "<fn \"println\">",
+      "<fn \"plus1\">",
+      "8",
+      "<fn \"plus2\">",
+      "0",
+      "<fn \"fib\">",
+      "0",
+      "0",
+      "1",
+      "1",
+      "2",
+      "55"
     ],
     "errLines": [ ]
   }

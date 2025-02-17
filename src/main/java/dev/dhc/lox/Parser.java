@@ -40,6 +40,7 @@ import dev.dhc.lox.AstNode.NilExpr;
 import dev.dhc.lox.AstNode.NumExpr;
 import dev.dhc.lox.AstNode.PrintStmt;
 import dev.dhc.lox.AstNode.Program;
+import dev.dhc.lox.AstNode.ReturnStmt;
 import dev.dhc.lox.AstNode.Stmt;
 import dev.dhc.lox.AstNode.StrExpr;
 import dev.dhc.lox.AstNode.UnaryExpr;
@@ -101,6 +102,13 @@ public class Parser {
     final int line = tok.line();
     return switch (tok.type()) {
       case LEFT_BRACE -> new BlockStmt(line, block());
+
+      case RETURN -> {
+        next();
+        final var e = peekIs(SEMICOLON) ? new NilExpr(line) : expr();
+        eat(SEMICOLON, "Expect ';' after return statement");
+        yield new ReturnStmt(line, e);
+      }
 
       case PRINT -> {
         next();

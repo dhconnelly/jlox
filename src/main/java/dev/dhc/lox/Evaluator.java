@@ -15,6 +15,7 @@ import dev.dhc.lox.AstNode.NilExpr;
 import dev.dhc.lox.AstNode.NumExpr;
 import dev.dhc.lox.AstNode.PrintStmt;
 import dev.dhc.lox.AstNode.Program;
+import dev.dhc.lox.AstNode.ReturnStmt;
 import dev.dhc.lox.AstNode.Stmt;
 import dev.dhc.lox.AstNode.StrExpr;
 import dev.dhc.lox.AstNode.UnaryExpr;
@@ -109,8 +110,20 @@ public class Evaluator {
     for (int i = 0; i < args.size(); i++) {
       env.define(f.params().get(i), args.get(i));
     }
-    executeBlock(f.body(), env);
+    try {
+      executeBlock(f.body(), env);
+    } catch (Return retvrn) {
+      return retvrn.result;
+    }
     return NIL;
+  }
+
+  private static class Return extends RuntimeException {
+    final Value result;
+    Return(Value result) {
+      super(null, null, false, false);
+      this.result = result;
+    }
   }
 
   public void execute(Stmt stmt) {
@@ -132,6 +145,7 @@ public class Evaluator {
         final var f = new LoxFunction(name, params, body);
         env.define(name, f);
       }
+      case ReturnStmt(_, Expr result) -> throw new Return(evaluate(result));
     }
   }
 
