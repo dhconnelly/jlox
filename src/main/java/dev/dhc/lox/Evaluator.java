@@ -105,8 +105,8 @@ public class Evaluator {
     }
   }
 
-  public Value call(LoxFunction f, List<Value> args) {
-    final var env = new Environment(globals);
+  public Value call(LoxFunction f, Environment closure, List<Value> args) {
+    final var env = new Environment(closure);
     for (int i = 0; i < args.size(); i++) {
       env.define(f.params().get(i), args.get(i));
     }
@@ -142,7 +142,7 @@ public class Evaluator {
         while (isTruthy(evaluate(cond))) execute(body);
       }
       case FunDecl(_, String name, List<String> params, List<Stmt> body) -> {
-        final var f = new LoxFunction(name, params, body);
+        final var f = new LoxFunction(name, env, params, body);
         env.define(name, f);
       }
       case ReturnStmt(_, Expr result) -> throw new Return(evaluate(result));
