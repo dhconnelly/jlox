@@ -1,6 +1,6 @@
-.PHONY: clean build test
+.PHONY: clean init build test ci
 
-all: clean init build test
+all: clean init build test ci
 
 clean:
 	cd craftinginterpreters; make clean
@@ -15,6 +15,8 @@ build:
 
 test:
 	mvn test
+
+ci:
 	./overrides/apply_overrides.sh craftinginterpreters
 	cd craftinginterpreters; dart tool/bin/test.dart chap10_functions --interpreter ../lox
 	cd craftinginterpreters; git checkout -f
