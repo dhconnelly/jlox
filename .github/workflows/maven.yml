@@ -21,4 +21,4 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: CI
-      run: make clean build test
+      run: make

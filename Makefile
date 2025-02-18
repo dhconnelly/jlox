@@ -1,6 +1,6 @@
 .PHONY: clean build test
 
-all: init build test
+all: clean init build test
 
 clean:
 	cd craftinginterpreters; make clean
