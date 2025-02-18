@@ -34,10 +34,10 @@ public class Driver {
     try {
       return runInternal(cmd);
     } catch (Error e) {
-      err.println(e.getMessage());
+      report(e);
       return e.code();
     } catch (IOException e) {
-      err.println(e.getMessage());
+      report(e);
       return Status.IO_ERROR;
     }
   }
@@ -53,7 +53,7 @@ public class Driver {
             out.println(tok);
             if (tok.type() == Type.EOF) break;
           } catch (Error e) {
-            err.println(e.getMessage());
+            report(e);
             code = e.code();
           }
         }
@@ -98,12 +98,20 @@ public class Driver {
             out.println(stmt);
             evaluator.execute(stmt);
           } catch (Exception e) {
-            err.println(e.getMessage());
+            report(e);
           }
         }
         yield Status.SUCCESS;
       }
     };
+  }
+
+  private void report(Exception e) {
+    if (e instanceof Error) {
+      err.println(e.getMessage());
+    } else {
+      err.println(e);
+    }
   }
 
   private Scanner scanFile(String path) throws IOException {

@@ -2,7 +2,4 @@
 
 set -e
 
-(
-  cd "$(dirname "$0")" # Ensure compile steps are run within the repository directory
-  mvn -q clean compile exec:java -Dexec.args="${*}"
-)
+java -jar "$(dirname "$0")"/target/lox.jar "$@"

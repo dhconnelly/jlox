@@ -75,7 +75,7 @@ public class Parser {
   }
 
   private Token eat(Type type, String message) {
-    if (!peekIs(type)) throw new SyntaxError(peek().line(), message);
+    if (!peekIs(type)) throw new SyntaxError(peek(), message);
     return next();
   }
 
@@ -88,33 +88,32 @@ public class Parser {
   }
 
   private List<Stmt> block() {
-    eat(LEFT_BRACE, "Expected '{'");
+    eat(LEFT_BRACE, "Expect '{' before block.");
     final var stmts = new ArrayList<Stmt>();
     while (!eof() && !peekIs(RIGHT_BRACE)) {
       stmts.add(stmt());
     }
-    eat(RIGHT_BRACE, "Expected '}'");
+    eat(RIGHT_BRACE, "Expect '}' after block.");
     return stmts;
   }
 
   private Stmt innerStmt() {
     final var tok = peek();
-    final int line = tok.line();
     return switch (tok.type()) {
-      case LEFT_BRACE -> new BlockStmt(line, block());
+      case LEFT_BRACE -> new BlockStmt(tok, block());
 
       case RETURN -> {
         next();
-        final var e = peekIs(SEMICOLON) ? new NilExpr(line) : expr();
+        final var e = peekIs(SEMICOLON) ? new NilExpr(tok) : expr();
         eat(SEMICOLON, "Expect ';' after return statement");
-        yield new ReturnStmt(line, e);
+        yield new ReturnStmt(tok, e);
       }
 
       case PRINT -> {
         next();
         final var e = expr();
         eat(SEMICOLON, "Expected ; after expression");
-        yield new PrintStmt(line, e);
+        yield new PrintStmt(tok, e);
       }
 
       case IF -> {
@@ -128,16 +127,16 @@ public class Parser {
           next();
           alt = Optional.of(innerStmt());
         }
-        yield new IfElseStmt(line, cond, conseq, alt);
+        yield new IfElseStmt(tok, cond, conseq, alt);
       }
 
       case WHILE -> {
         next();
         eat(LEFT_PAREN, "Expect '('");
-        final var cond = peekIs(RIGHT_PAREN) ? new NilExpr(line) : expr();
+        final var cond = peekIs(RIGHT_PAREN) ? new BoolExpr(peek(), true) : expr();
         eat(RIGHT_PAREN, "Expect '('");
         final var body = innerStmt();
-        yield new WhileStmt(line, cond, body);
+        yield new WhileStmt(tok, cond, body);
       }
 
       case FOR -> {
@@ -145,16 +144,16 @@ public class Parser {
         eat(LEFT_PAREN, "Expect '('");
         final var init = peekIs(VAR) ? varDecl() : exprStmt();
         // already ate the first semicolon
-        final var cond = peekIs(SEMICOLON) ? new NilExpr(line) : expr();
+        final var cond = peekIs(SEMICOLON) ? new BoolExpr(peek(), true) : expr();
         eat(SEMICOLON, "Expect ';'");
-        final var iter = new ExprStmt(line, peekIs(RIGHT_PAREN) ? new NilExpr(line) : expr());
+        final var iter = new ExprStmt(tok, peekIs(RIGHT_PAREN) ? new NilExpr(tok) : expr());
         eat(RIGHT_PAREN, "Expect '('");
         final var body = innerStmt();
 
         // desugar to while loop
-        final var whileBody = new BlockStmt(line, List.of(body, iter));
-        final var whileLoop = new WhileStmt(line, cond, whileBody);
-        yield new BlockStmt(line, List.of(init, whileLoop));
+        final var whileBody = new BlockStmt(tok, List.of(body, iter));
+        final var whileLoop = new WhileStmt(tok, cond, whileBody);
+        yield new BlockStmt(tok, List.of(init, whileLoop));
       }
 
       default -> exprStmt();
@@ -162,21 +161,21 @@ public class Parser {
   }
 
   public Stmt exprStmt() {
-    final var e = peekIs(SEMICOLON) ? new NilExpr(peek().line()) : expr();
+    final var e = peekIs(SEMICOLON) ? new NilExpr(peek()) : expr();
     eat(SEMICOLON, "Expected ; after expression");
-    return new ExprStmt(e.line(), e);
+    return new ExprStmt(e.tok(), e);
   }
 
   public Stmt varDecl() {
-    final int line = eat(VAR, "Expected 'var'").line();
-    final var name = eat(IDENTIFIER, "Expected variable name").cargo();
+    final var tok = eat(VAR, "Expected 'var'");
+    final var name = eat(IDENTIFIER, "Expect variable name.").cargo();
     var init = Optional.<Expr>empty();
     if (peekIs(EQUAL)) {
       next();
       init = Optional.of(expr());
     }
     eat(SEMICOLON, "Expected ; after variable declaration");
-    return new VarDecl(line, name, init);
+    return new VarDecl(tok, name, init);
   }
 
   public Stmt function() {
@@ -184,15 +183,17 @@ public class Parser {
     eat(LEFT_PAREN, "Expect '(' after function name");
     final var params = new ArrayList<String>();
     while (!peekIs(RIGHT_PAREN)) {
-      if (!params.isEmpty()) eat(COMMA, "Expect ',' after parameter");
-      if (params.size() > MAX_ARGS) {
-        throw new SyntaxError(name.line(), "Exceeded parameter count limit");
+      if (!params.isEmpty()) eat(COMMA, "Expect ')' after parameters.");
+      final var param = eat(IDENTIFIER, "Expect parameter name");
+      if (params.size() >= MAX_ARGS) {
+        throw new SyntaxError(param, String.format("Can't have more than %d parameters.", MAX_ARGS));
       }
-      params.add(eat(IDENTIFIER, "Expect parameter name").cargo());
+      params.add(param.cargo());
     }
     eat(RIGHT_PAREN, "Expect '(' after parameters");
+    if (!peekIs(LEFT_BRACE)) throw new SyntaxError(peek(), "Expect '{' before function body.");
     final var body = block();
-    return new FunDecl(name.line(), name.cargo(), params, body);
+    return new FunDecl(name, name.cargo(), params, body);
   }
 
   public Stmt funDecl() {
@@ -228,7 +229,7 @@ public class Parser {
       case MINUS -> BinOp.MINUS;
       case SLASH -> BinOp.SLASH;
       case STAR -> BinOp.STAR;
-      default -> throw new SyntaxError(tok.line(), "Expected binop.");
+      default -> throw new SyntaxError(tok, "Expected binop.");
     };
   }
 
@@ -239,12 +240,12 @@ public class Parser {
   private Expr assignment() {
     final var expr = or();
     if (peekIs(EQUAL)) {
-      next();
+      final var equal = next();
       final var binding = expr();
-      if (expr instanceof VarExpr(int line, String name)) {
-        return new AssignExpr(line, name, binding);
+      if (expr instanceof VarExpr(Token tok, String name)) {
+        return new AssignExpr(tok, name, binding);
       } else {
-        throw new SyntaxError(expr.line(), String.format("Invalid assignment target: %s", expr));
+        throw new SyntaxError(equal, "Invalid assignment target.");
       }
     }
     return expr;
@@ -255,7 +256,7 @@ public class Parser {
     while (peekIs(OR)) {
       final var op = binOp(next());
       final var rhs = and();
-      expr = new BinaryExpr(expr.line(), expr, op, rhs);
+      expr = new BinaryExpr(expr.tok(), expr, op, rhs);
     }
     return expr;
   }
@@ -265,7 +266,7 @@ public class Parser {
     while (peekIs(AND)) {
       final var op = binOp(next());
       final var rhs = equality();
-      expr = new BinaryExpr(expr.line(), expr, op, rhs);
+      expr = new BinaryExpr(expr.tok(), expr, op, rhs);
     }
     return expr;
   }
@@ -275,7 +276,7 @@ public class Parser {
     while (peekIs(BANG_EQUAL, EQUAL_EQUAL)) {
       final var op = binOp(next());
       final var rhs = comparison();
-      expr = new BinaryExpr(expr.line(), expr, op, rhs);
+      expr = new BinaryExpr(expr.tok(), expr, op, rhs);
     }
     return expr;
   }
@@ -285,7 +286,7 @@ public class Parser {
     while (peekIs(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
       final var op = binOp(next());
       final var rhs = term();
-      expr = new BinaryExpr(expr.line(), expr, op, rhs);
+      expr = new BinaryExpr(expr.tok(), expr, op, rhs);
     }
     return expr;
   }
@@ -295,7 +296,7 @@ public class Parser {
     while (peekIs(MINUS, PLUS)) {
       final var op = binOp(next());
       final var rhs = factor();
-      expr = new BinaryExpr(expr.line(), expr, op, rhs);
+      expr = new BinaryExpr(expr.tok(), expr, op, rhs);
     }
     return expr;
   }
@@ -305,7 +306,7 @@ public class Parser {
     while (peekIs(SLASH, STAR)) {
       final var op = binOp(next());
       final var rhs = unary();
-      expr = new BinaryExpr(expr.line(), expr, op, rhs);
+      expr = new BinaryExpr(expr.tok(), expr, op, rhs);
     }
     return expr;
   }
@@ -314,16 +315,16 @@ public class Parser {
     return switch (tok.type()) {
       case BANG -> UnaryOp.BANG;
       case MINUS -> UnaryOp.MINUS;
-      default -> throw new SyntaxError(tok.line(), "Expected unary op.");
+      default -> throw new SyntaxError(tok, "Expected unary op.");
     };
   }
 
   private Expr unary() {
     if (peekIs(BANG, MINUS)) {
-      final int line = peek().line();
+      final var tok = peek();
       final var op = unaryOp(next());
       final var rhs = unary();
-      return new UnaryExpr(line, op, rhs);
+      return new UnaryExpr(tok, op, rhs);
     }
     return call();
   }
@@ -338,12 +339,12 @@ public class Parser {
           eat(COMMA, "Expect ',' after argument");
         }
         if (args.size() >= MAX_ARGS) {
-          throw new SyntaxError(expr.line(), "Exceeded argument count limit");
+          throw new SyntaxError(peek(), String.format("Can't have more than %d arguments.", MAX_ARGS));
         }
         args.add(expr());
       }
-      eat(RIGHT_PAREN, "Expect ')' after arguments");
-      expr = new CallExpr(expr.line(), expr, args);
+      eat(RIGHT_PAREN, "Expect ')' after arguments.");
+      expr = new CallExpr(expr.tok(), expr, args);
     }
     return expr;
   }
@@ -351,19 +352,19 @@ public class Parser {
   private Expr primary() {
     final var tok = peek();
     return switch (tok.type()) {
-      case NIL -> new NilExpr(next().line());
-      case TRUE -> new BoolExpr(next().line(), true);
-      case FALSE -> new BoolExpr(next().line(), false);
-      case NUMBER -> new NumExpr(next().line(), tok.literal().get().asNumber());
-      case STRING -> new StrExpr(next().line(), tok.literal().get().asString());
-      case IDENTIFIER -> new VarExpr(next().line(), tok.cargo());
+      case NIL -> new NilExpr(next());
+      case TRUE -> new BoolExpr(next(), true);
+      case FALSE -> new BoolExpr(next(), false);
+      case NUMBER -> new NumExpr(next(), tok.literal().get().asNumber());
+      case STRING -> new StrExpr(next(), tok.literal().get().asString());
+      case IDENTIFIER -> new VarExpr(next(), tok.cargo());
       case LEFT_PAREN -> {
         next();
         final var expr = expr();
         eat(RIGHT_PAREN, "Expect ')' after expression.");
-        yield new Grouping(tok.line(), expr);
+        yield new Grouping(tok, expr);
       }
-      default -> throw new SyntaxError(tok.line(), "Expect expression.");
+      default -> throw new SyntaxError(tok, "Expect expression.");
     };
   }
 }

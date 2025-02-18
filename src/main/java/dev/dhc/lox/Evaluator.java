@@ -31,10 +31,10 @@ import dev.dhc.lox.Value.LoxNativeFunction;
 import dev.dhc.lox.Value.NilValue;
 import dev.dhc.lox.Value.NumValue;
 import dev.dhc.lox.Value.StrValue;
-import dev.dhc.lox.Value.Type;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 public class Evaluator {
   private static final Value NIL = new NilValue();
@@ -50,32 +50,38 @@ public class Evaluator {
             new NumValue((double) System.currentTimeMillis() / 1000.0)));
   }
 
-  private RuntimeError typeError(Expr e, Type want, Value got) {
-    return new RuntimeError(e.line(), String.format("%s: want %s, got %s", e, want, got.type()));
+  private RuntimeError error(Token tok, String format, Object... args) {
+    return new RuntimeError(tok.line(), String.format(format, args));
   }
 
-  private RuntimeError arityError(int line, LoxCallable f, List<Value> args) {
-    return new RuntimeError(line, String.format("expected %d arguments, got %d", f.arity(), args.size()));
+  private record Pair<T, U>(T t, U u) {
+    <V> V reduce(BiFunction<T, U, V> f) {
+      return f.apply(t, u);
+    }
+  }
+
+  private Pair<Value, Value> evaluate(Expr lhs, Expr rhs) {
+    return new Pair<>(evaluate(lhs), evaluate(rhs));
   }
 
   private LoxCallable asCallable(Expr e) {
     return switch (evaluate(e)) {
       case LoxCallable c -> c;
-      case Value v -> throw typeError(e, Type.CALLABLE, v);
+      case Value ignored -> throw error(e.tok(), "Can only call functions and classes.");
     };
   }
 
   private double asNumber(Expr e) {
     return switch (evaluate(e)) {
       case NumValue(double value) -> value;
-      case Value v -> throw typeError(e, Type.NUM, v);
+      case Value ignored -> throw error(e.tok(), "Operand must be a number.");
     };
   }
 
-  private String asString(Expr e) {
-    return switch (evaluate(e)) {
-      case StrValue(String value) -> value;
-      case Value v -> throw typeError(e, Type.STR, v);
+  private Pair<Double, Double> asNumbers(Expr lhs, Expr rhs) {
+    return switch (evaluate(lhs, rhs)) {
+      case Pair(NumValue left, NumValue right) -> new Pair<>(left.value(), right.value());
+      default -> throw error(lhs.tok(), "Operands must be numbers.");
     };
   }
 
@@ -149,6 +155,10 @@ public class Evaluator {
     }
   }
 
+  private Error undefined(Token ident) {
+    throw error(ident, "Undefined variable '%s'.", ident.cargo());
+  }
+
   public Value evaluate(Expr expr) {
     return switch (expr) {
       case BoolExpr(_, boolean value) -> new BoolValue(value);
@@ -156,25 +166,27 @@ public class Evaluator {
       case NumExpr(_, double value) -> new NumValue(value);
       case NilExpr(_) -> new NilValue();
       case Grouping(_, Expr e) -> evaluate(e);
-      case VarExpr(_, String name) -> env.get(name);
-      case AssignExpr(_, String name, Expr e) -> env.assign(name, evaluate(e));
+      case VarExpr(Token tok, String name) ->
+          env.get(name).orElseThrow(() -> undefined(tok));
+      case AssignExpr(Token tok, String name, Expr e) ->
+          env.assign(name, evaluate(e)).orElseThrow(() -> undefined(tok));
       case UnaryExpr(_, UnaryOp op, Expr e) -> switch (op) {
         case BANG -> new BoolValue(!isTruthy(evaluate(e)));
         case MINUS -> new NumValue(-asNumber(e));
       };
-      case BinaryExpr(int line, Expr left, BinOp op, Expr right) -> switch (op) {
-        case PLUS -> switch (evaluate(left)) {
-          case NumValue lhs -> new NumValue(lhs.value() + asNumber(right));
-          case StrValue lhs -> new StrValue(lhs.value() + asString(right));
-          default -> throw new RuntimeError(line, "operands to + must be both string or number");
+      case BinaryExpr(Token tok, Expr left, BinOp op, Expr right) -> switch (op) {
+        case PLUS -> switch (evaluate(left, right)) {
+          case Pair(NumValue lhs, NumValue rhs) -> new NumValue(lhs.value() + rhs.value());
+          case Pair(StrValue lhs, StrValue rhs) -> new StrValue(lhs.value() + rhs.value());
+          default -> throw error(tok, "Operands must be two numbers or two strings.");
         };
-        case MINUS -> new NumValue(asNumber(left) - asNumber(right));
-        case SLASH -> new NumValue(asNumber(left) / asNumber(right));
-        case STAR -> new NumValue(asNumber(left) * asNumber(right));
-        case GREATER -> new BoolValue(asNumber(left) > asNumber(right));
-        case GREATER_EQUAL -> new BoolValue(asNumber(left) >= asNumber(right));
-        case LESS -> new BoolValue(asNumber(left) < asNumber(right));
-        case LESS_EQUAL -> new BoolValue(asNumber(left) <= asNumber(right));
+        case MINUS -> asNumbers(left, right).reduce((lhs, rhs) -> new NumValue(lhs - rhs));
+        case SLASH -> asNumbers(left, right).reduce((lhs, rhs) -> new NumValue(lhs / rhs));
+        case STAR -> asNumbers(left, right).reduce((lhs, rhs) -> new NumValue(lhs * rhs));
+        case GREATER -> asNumbers(left, right).reduce((lhs, rhs) -> new BoolValue(lhs > rhs));
+        case GREATER_EQUAL -> asNumbers(left, right).reduce((lhs, rhs) -> new BoolValue(lhs >= rhs));
+        case LESS -> asNumbers(left, right).reduce((lhs, rhs) -> new BoolValue(lhs < rhs));
+        case LESS_EQUAL -> asNumbers(left, right).reduce((lhs, rhs) -> new BoolValue(lhs <= rhs));
         case BANG_EQUAL -> new BoolValue(!evaluate(left).equals(evaluate(right)));
         case EQUAL_EQUAL -> new BoolValue(evaluate(left).equals(evaluate(right)));
         case AND -> {
@@ -186,10 +198,12 @@ public class Evaluator {
           yield isTruthy(lhs) ? lhs : evaluate(right);
         }
       };
-      case CallExpr(_, Expr callee, List<Expr> args) -> {
+      case CallExpr(Token tok, Expr callee, List<Expr> args) -> {
         final var f = asCallable(callee);
         final var a = args.stream().map(this::evaluate).toList();
-        if (f.arity() != a.size()) throw arityError(callee.line(), f, a);
+        if (f.arity() != a.size()) {
+          throw error(tok, "Expected %d arguments but got %d.", f.arity(), a.size());
+        }
         yield f.call(this, a);
       }
     };

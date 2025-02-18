@@ -3,7 +3,8 @@ dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/call_errors.lox]=[
     "code": 70,
     "outLines": [ ],
     "errLines": [
-      "[line 1] Error: foo: want CALLABLE, got STR"
+      "Can only call functions and classes.",
+      "[line 1]"
     ]
   }
 ]
@@ -41,7 +42,8 @@ dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/plus_bad_types_error.lo
     "code": 70,
     "outLines": [ ],
     "errLines": [
-      "[line 1] Error: operands to + must be both string or number"
+      "Operands must be two numbers or two strings.",
+      "[line 1]"
     ]
   }
 ]
@@ -52,7 +54,8 @@ dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/plus_same_types_error.l
     "code": 70,
     "outLines": [ ],
     "errLines": [
-      "[line 1] Error: 7.0: want STR, got NUM"
+      "Operands must be two numbers or two strings.",
+      "[line 1]"
     ]
   }
 ]
@@ -63,7 +66,8 @@ dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/unary_error.lox]=[
     "code": 70,
     "outLines": [ ],
     "errLines": [
-      "[line 1] Error: foo: want NUM, got STR"
+      "Operand must be a number.",
+      "[line 1]"
     ]
   }
 ]
@@ -235,7 +239,8 @@ dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/undefined_error.lox]=
     "code": 70,
     "outLines": [ ],
     "errLines": [
-      "Error: Undefined variable: 'foo'"
+      "Undefined variable 'foo'.",
+      "[line 1]"
     ]
   }
 ]
@@ -340,8 +345,8 @@ dev.dhc.lox.IntegrationTest.testTokenize[inputs/tokenize/scanner_errors.lox]=[
       "EOF  null"
     ],
     "errLines": [
-      "[line 1] Error: Unexpected character: #",
-      "[line 2] Error: Unterminated string."
+      "[line 1] Error: Unexpected character.",
+      "[line 3] Error: Unterminated string."
     ]
   }
 ]

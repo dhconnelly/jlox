@@ -21,25 +21,21 @@ public class Environment {
     values.put(name, value);
   }
 
-  private static RuntimeError undefined(String name) {
-    return new RuntimeError(String.format("Undefined variable: '%s'", name));
-  }
-
-  public Value assign(String name, Value value) {
+  public Optional<Value> assign(String name, Value value) {
     if (values.containsKey(name)) {
       values.put(name, value);
-      return value;
+      return Optional.of(value);
     }
     if (up.isPresent()) {
       return up.get().assign(name, value);
     }
-    throw undefined(name);
+    return Optional.empty();
   }
 
-  public Value get(String name) {
+  public Optional<Value> get(String name) {
     final var value = values.get(name);
-    if (value != null) return value;
+    if (value != null) return Optional.of(value);
     if (up.isPresent()) return up.get().get(name);
-    throw undefined(name);
+    return Optional.empty();
   }
 }

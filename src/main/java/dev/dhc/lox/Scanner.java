@@ -1,6 +1,5 @@
 package dev.dhc.lox;
 
-import dev.dhc.lox.Error.IOError;
 import dev.dhc.lox.Error.SyntaxError;
 import dev.dhc.lox.Token.Literal;
 import dev.dhc.lox.Token.NumberLiteral;
@@ -49,7 +48,7 @@ public class Scanner {
       reader.reset();
       return c;
     } catch (IOException e) {
-      throw new IOError(e);
+      throw new RuntimeException(e);
     }
   }
 
@@ -61,10 +60,11 @@ public class Scanner {
     try {
       int c = reader.read();
       if (c == -1) error("Unexpected eof.");
+      if (c == '\n') line++;
       current.append((char) c);
       return (char) c;
     } catch (IOException e) {
-      throw new IOError(e);
+      throw new RuntimeException(e);
     }
   }
 
@@ -184,7 +184,6 @@ public class Scanner {
         }
 
         case ' ', '\t', '\n' -> {
-          if (c == '\n') line++;
           continue;
         }
 
@@ -200,7 +199,7 @@ public class Scanner {
             eatWhile(this::isAlphaNumeric);
             emit(resolveType(current.toString()));
           } else {
-            error(String.format("Unexpected character: %c", c));
+            error("Unexpected character.");
           }
         }
       }
