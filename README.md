@@ -1,50 +1,37 @@
-[![progress-banner](https://backend.codecrafters.io/progress/interpreter/2a6b7cc1-ae24-4e6b-b489-4b2245c38d9f)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+## jlox
 
-This is a starting point for Java solutions to the
-["Build your own Interpreter" Challenge](https://app.codecrafters.io/courses/interpreter/overview).
+An implementation of jlox, the first variant of the Lox language described in the book
+[Crafting Interpreters](https://www.craftinginterpreters.com/contents.html) by Robert Nystrom.
 
-This challenge follows the book
-[Crafting Interpreters](https://craftinginterpreters.com/) by Robert Nystrom.
+## status
 
-In this challenge you'll build an interpreter for
-[Lox](https://craftinginterpreters.com/the-lox-language.html), a simple
-scripting language. Along the way, you'll learn about tokenization, ASTs,
-tree-walk interpreters and more.
+- [x] codecrafters interpreter challenge (ch. 1-10 of the book)
+- [ ] full jlox compliance (ch. 11-13 of the book)
+- [ ] aot compiler to java bytecode
 
-Before starting this challenge, make sure you've read the "Welcome" part of the
-book that contains these chapters:
+## overview
 
-- [Introduction](https://craftinginterpreters.com/introduction.html) (chapter 1)
-- [A Map of the Territory](https://craftinginterpreters.com/a-map-of-the-territory.html)
-  (chapter 2)
-- [The Lox Language](https://craftinginterpreters.com/the-lox-language.html)
-  (chapter 3)
+This implementation diverges from the one in the book in the following ways:
 
-These chapters don't involve writing code, so they won't be covered in this
-challenge. This challenge will start from chapter 4,
-[Scanning](https://craftinginterpreters.com/scanning.html).
+-   extensive use of records, sealed interfaces, and pattern matching instead of the visitor pattern 
+-   synchronization is not implemented, so only the first syntax error is reported. (this requires
+    some overrides to the test suite, which are applied by the makefile)
+-   uses a different driver and CLI so that it also satisfies the interface expected by the
+    [CodeCrafters Interpreter challenge](https://app.codecrafters.io/courses/interpreter/overview)
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+## usage
 
-# Passing the first stage
+just once, to fetch dependencies and so on:
 
-The entry point for your program is in `src/main/java/dev.dhc.lox.Driver.java`. Study and
-uncomment the relevant code, and push your changes to pass the first stage:
+    make all
 
-```sh
-git commit -am "pass 1st stage" # any msg
-git push origin master
-```
+there is a wrapper for the cli:
 
-Time to move on to the next stage!
+    ./lox           # run the repl
+    ./lox FILE      # run a lox program stored in FILENAME
 
-# Stage 2 & beyond
+during development:
 
-Note: This section is for stages 2 and beyond.
-
-1. Ensure you have `mvn` installed locally
-2. Run `./your_program.sh` to run your program, which is implemented in
-   `src/main/java/dev.dhc.lox.Driver.java`.
-3. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+    make test       # build the project and run integration tests
+    make build ci   # build the project and run the test suite from the book repository
+    make build      # build an executable jar at target/lox.jar
