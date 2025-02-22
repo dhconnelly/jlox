@@ -32,9 +32,7 @@ import dev.dhc.lox.Value.NilValue;
 import dev.dhc.lox.Value.NumValue;
 import dev.dhc.lox.Value.StrValue;
 import java.io.PrintStream;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
@@ -138,8 +136,8 @@ public class Evaluator {
     switch (stmt) {
       case ExprStmt(_, Expr e) -> evaluate(e);
       case PrintStmt(_, Expr e) -> out.println(evaluate(e));
-      case VarDecl(_, String name, Optional<Expr> init) ->
-          env.define(name, init.map(this::evaluate).orElse(NIL));
+      case VarDecl(_, var name, Optional<Expr> init) ->
+          env.define(name.cargo(), init.map(this::evaluate).orElse(NIL));
       case BlockStmt(_, List<Stmt> stmts) ->
           executeBlock(stmts, new Environment(env));
       case IfElseStmt(_, Expr cond, Stmt conseq, Optional<Stmt> alt) -> {
@@ -149,9 +147,9 @@ public class Evaluator {
       case WhileStmt(_, Expr cond, Stmt body) -> {
         while (isTruthy(evaluate(cond))) execute(body);
       }
-      case FunDecl(_, String name, List<String> params, List<Stmt> body) -> {
-        final var f = new LoxFunction(name, env, params, body);
-        env.define(name, f);
+      case FunDecl(_, var name, var params, List<Stmt> body) -> {
+        final var f = new LoxFunction(name.cargo(), env, params.stream().map(Token::cargo).toList(), body);
+        env.define(name.cargo(), f);
       }
       case ReturnStmt(_, Expr result) -> throw new Return(evaluate(result));
     }
@@ -170,7 +168,7 @@ public class Evaluator {
   private Value assign(AssignExpr varExpr, String name, Value value) {
     return varExpr.scopeDepth() >= 0
         ? env.assignAt(varExpr.scopeDepth(), name, value)
-        : globals.assign(name, value);
+        : globals.assign(name, value).orElseThrow(() -> undefined(varExpr.tok()));
   }
 
   public Value evaluate(Expr expr) {

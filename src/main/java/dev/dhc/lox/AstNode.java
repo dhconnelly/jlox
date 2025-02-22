@@ -71,8 +71,8 @@ public sealed interface AstNode {
   }
 
   sealed interface Stmt extends AstNode {}
-  record VarDecl(Token tok, String name, Optional<Expr> init) implements Stmt {}
-  record FunDecl(Token tok, String name, List<String> params, List<Stmt> body) implements Stmt {}
+  record VarDecl(Token tok, Token name, Optional<Expr> init) implements Stmt {}
+  record FunDecl(Token tok, Token name, List<Token> params, List<Stmt> body) implements Stmt {}
   record ExprStmt(Token tok, Expr expr) implements Stmt {}
   record PrintStmt(Token tok, Expr expr) implements Stmt {}
   record BlockStmt(Token tok, List<Stmt> stmts) implements Stmt {}

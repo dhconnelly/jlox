@@ -168,7 +168,7 @@ public class Parser {
 
   public Stmt varDecl() {
     final var tok = eat(VAR, "Expected 'var'");
-    final var name = eat(IDENTIFIER, "Expect variable name.").cargo();
+    final var name = eat(IDENTIFIER, "Expect variable name.");
     var init = Optional.<Expr>empty();
     if (peekIs(EQUAL)) {
       next();
@@ -181,19 +181,19 @@ public class Parser {
   public Stmt function() {
     final var name = eat(IDENTIFIER, "Expect function name");
     eat(LEFT_PAREN, "Expect '(' after function name");
-    final var params = new ArrayList<String>();
+    final var params = new ArrayList<Token>();
     while (!peekIs(RIGHT_PAREN)) {
       if (!params.isEmpty()) eat(COMMA, "Expect ')' after parameters.");
       final var param = eat(IDENTIFIER, "Expect parameter name");
       if (params.size() >= MAX_ARGS) {
         throw new SyntaxError(param, String.format("Can't have more than %d parameters.", MAX_ARGS));
       }
-      params.add(param.cargo());
+      params.add(param);
     }
     eat(RIGHT_PAREN, "Expect '(' after parameters");
     if (!peekIs(LEFT_BRACE)) throw new SyntaxError(peek(), "Expect '{' before function body.");
     final var body = block();
-    return new FunDecl(name, name.cargo(), params, body);
+    return new FunDecl(name, name, params, body);
   }
 
   public Stmt funDecl() {

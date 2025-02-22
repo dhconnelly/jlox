@@ -23,7 +23,7 @@ import dev.dhc.lox.AstNode.UnaryOp;
 import dev.dhc.lox.AstNode.VarDecl;
 import dev.dhc.lox.AstNode.VarExpr;
 import dev.dhc.lox.AstNode.WhileStmt;
-import dev.dhc.lox.Error.ResolutionError;
+import dev.dhc.lox.Error.SyntaxError;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +33,12 @@ import java.util.Stack;
 public class Resolver {
   // Stack of scopes where scope: name in scope -> fully initialized
   private final Stack<Map<String, Boolean>> scopes = new Stack<>();
+
+  private enum FunctionType {
+    NONE,
+    FUNCTION
+  }
+  private FunctionType currentFunction = FunctionType.NONE;
 
   public Program resolve(Program program) {
     return new Program(program.stmts().stream().map(this::resolve).toList());
@@ -46,16 +52,20 @@ public class Resolver {
     scopes.pop();
   }
 
-  private void declare(String name) {
+  private void declare(Token name) {
     // globals are not resolved
     if (scopes.empty()) return;
-    scopes.peek().put(name, false);
+    var scope = scopes.peek();
+    if (scope.containsKey(name.cargo())) {
+      throw new SyntaxError(name, "Already a variable with this name in this scope.");
+    }
+    scope.put(name.cargo(), false);
   }
 
-  private void define(String name) {
+  private void define(Token name) {
     // globals are not resolved
     if (scopes.empty()) return;
-    scopes.peek().put(name, true);
+    scopes.peek().put(name.cargo(), true);
   }
 
   private int resolveLocal(Expr expr, String name) {
@@ -71,9 +81,7 @@ public class Resolver {
     return switch (expr) {
       case VarExpr varExpr -> {
         if (!scopes.empty() && scopes.peek().get(varExpr.name()) == Boolean.FALSE) {
-          throw new ResolutionError(
-              varExpr.tok().line(),
-              "Can't read local variable in its own initializer.");
+          throw new SyntaxError(varExpr.tok(), "Can't read local variable in its own initializer.");
         }
         int depth = resolveLocal(varExpr, varExpr.name());
         yield new VarExpr(varExpr.tok(), varExpr.name(), depth);
@@ -107,14 +115,19 @@ public class Resolver {
     return stmts.stream().map(this::resolve).toList();
   }
 
-  private List<Stmt> resolveFunction(List<String> params, List<Stmt> body) {
+  private List<Stmt> resolveFunction(List<Token> params, List<Stmt> body, FunctionType type) {
+    var enclosing = currentFunction;
+    currentFunction = type;
+
     beginScope();
-    for (String param : params) {
+    for (var param : params) {
       declare(param);
       define(param);
     }
     var body2 = resolve(body);
     endScope();
+
+    currentFunction = enclosing;
     return body2;
   }
 
@@ -127,10 +140,10 @@ public class Resolver {
         yield new BlockStmt(tok, stmts2);
       }
 
-      case FunDecl(Token tok, String name, List<String> params, List<Stmt> body) -> {
+      case FunDecl(Token tok, Token name, List<Token> params, List<Stmt> body) -> {
         declare(name);
         define(name);
-        yield new FunDecl(tok, name, params, resolveFunction(params, body));
+        yield new FunDecl(tok, name, params, resolveFunction(params, body, FunctionType.FUNCTION));
       }
 
       case IfElseStmt(Token tok, Expr cond, Stmt conseq, Optional<Stmt> alt) -> {
@@ -140,7 +153,7 @@ public class Resolver {
         yield new IfElseStmt(tok, cond2, conseq2, alt2);
       }
 
-      case VarDecl(Token tok, String name, Optional<Expr> init) -> {
+      case VarDecl(Token tok, Token name, Optional<Expr> init) -> {
         declare(name);
         var init2 = init.map(this::resolve);
         define(name);
@@ -155,7 +168,12 @@ public class Resolver {
 
       case ExprStmt(Token tok, Expr expr) -> new ExprStmt(tok, resolve(expr));
       case PrintStmt(Token tok, Expr expr) -> new PrintStmt(tok, resolve(expr));
-      case ReturnStmt(Token tok, Expr expr) -> new ReturnStmt(tok, resolve(expr));
+      case ReturnStmt(Token tok, Expr expr) -> {
+        if (currentFunction == FunctionType.NONE) {
+          throw new SyntaxError(tok, "Can't return from top-level code.");
+        }
+        yield new ReturnStmt(tok, resolve(expr));
+      }
     };
   }
 }

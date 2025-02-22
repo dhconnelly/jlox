@@ -1,6 +1,7 @@
 package dev.dhc.lox;
 
 import dev.dhc.lox.Error.RuntimeError;
+import dev.dhc.lox.Error.SyntaxError;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -21,13 +22,12 @@ public class Environment {
     values.put(name, value);
   }
 
-  public Value assign(String name, Value value) {
+  public Optional<Value> assign(String name, Value value) {
     if (values.containsKey(name)) {
       values.put(name, value);
-      return value;
+      return Optional.of(value);
     }
-    up.get().assign(name, value);
-    return value;
+    return up.flatMap(env -> env.assign(name, value));
   }
 
   public Optional<Value> get(String name) {

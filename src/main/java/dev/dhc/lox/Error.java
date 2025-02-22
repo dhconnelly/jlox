@@ -23,12 +23,6 @@ public sealed abstract class Error extends RuntimeException {
     }
   }
 
-  public static final class ResolutionError extends Error {
-    public ResolutionError(int line, String message) {
-      super(Status.RESOLUTION_ERROR, message);
-    }
-  }
-
   public static final class RuntimeError extends Error {
     public RuntimeError(int line, String message) {
       super(Status.RUNTIME_ERROR, String.format("%s\n[line %d]", message, line));
