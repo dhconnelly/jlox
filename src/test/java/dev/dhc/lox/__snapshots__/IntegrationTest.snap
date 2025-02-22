@@ -188,6 +188,18 @@ dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/functions.lox]=[
 ]
 
 
+dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/resolve.lox]=[
+  {
+    "code": 0,
+    "outLines": [
+      "global",
+      "global"
+    ],
+    "errLines": [ ]
+  }
+]
+
+
 dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/scope.lox]=[
   {
     "code": 0,

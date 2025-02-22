@@ -69,10 +69,13 @@ public class Driver {
 
       case Command.Evaluate(var path) -> {
         final var evaluator = new Evaluator(out);
+        final var resolver = new Resolver();
         try (var reader = Files.newBufferedReader(Paths.get(path))) {
           final var exprs = reader.lines().map(this::parse).map(Parser::expr);
-          final var values = exprs.map(evaluator::evaluate);
-          values.forEach(out::println);
+          exprs.forEach(expr -> {
+            final var value = evaluator.evaluate(resolver.resolve(expr));
+            out.println(value);
+          });
         }
         yield Status.SUCCESS;
       }
@@ -80,8 +83,9 @@ public class Driver {
       case Command.Run(var path) -> {
         final var program = parseFile(path).program();
         final var evaluator = new Evaluator(out);
+        final var resolver = new Resolver();
         for (var stmt : program.stmts()) {
-          evaluator.execute(stmt);
+          evaluator.execute(resolver.resolve(stmt));
         }
         yield Status.SUCCESS;
       }
@@ -89,6 +93,7 @@ public class Driver {
       case Command.Repl() -> {
         final var reader = new BufferedReader(new InputStreamReader(in));
         final var evaluator = new Evaluator(out);
+        final var resolver = new Resolver();
         while (true) {
           out.print("> ");
           try {
@@ -96,7 +101,7 @@ public class Driver {
             if (line == null) break;
             final var stmt = parse(line).stmt();
             out.println(stmt);
-            evaluator.execute(stmt);
+            evaluator.execute(resolver.resolve(stmt));
           } catch (Exception e) {
             report(e);
           }

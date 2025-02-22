@@ -32,7 +32,9 @@ import dev.dhc.lox.Value.NilValue;
 import dev.dhc.lox.Value.NumValue;
 import dev.dhc.lox.Value.StrValue;
 import java.io.PrintStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
@@ -156,7 +158,19 @@ public class Evaluator {
   }
 
   private Error undefined(Token ident) {
-    throw error(ident, "Undefined variable '%s'.", ident.cargo());
+    return error(ident, "Undefined variable '%s'.", ident.cargo());
+  }
+
+  private Value lookup(Token at, VarExpr lookupExpr, String name) {
+    return lookupExpr.scopeDepth() >= 0
+        ? env.getAt(lookupExpr.scopeDepth(), name)
+        : globals.get(name).orElseThrow(() -> undefined(at));
+  }
+
+  private Value assign(AssignExpr varExpr, String name, Value value) {
+    return varExpr.scopeDepth() >= 0
+        ? env.assignAt(varExpr.scopeDepth(), name, value)
+        : globals.assign(name, value);
   }
 
   public Value evaluate(Expr expr) {
@@ -166,10 +180,8 @@ public class Evaluator {
       case NumExpr(_, double value) -> new NumValue(value);
       case NilExpr(_) -> new NilValue();
       case Grouping(_, Expr e) -> evaluate(e);
-      case VarExpr(Token tok, String name) ->
-          env.get(name).orElseThrow(() -> undefined(tok));
-      case AssignExpr(Token tok, String name, Expr e) ->
-          env.assign(name, evaluate(e)).orElseThrow(() -> undefined(tok));
+      case VarExpr e -> lookup(e.tok(), e, e.tok().cargo());
+      case AssignExpr e -> assign(e, e.name(), evaluate(e.e()));
       case UnaryExpr(_, UnaryOp op, Expr e) -> switch (op) {
         case BANG -> new BoolValue(!isTruthy(evaluate(e)));
         case MINUS -> new NumValue(-asNumber(e));

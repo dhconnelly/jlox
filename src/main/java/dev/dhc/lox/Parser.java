@@ -242,8 +242,8 @@ public class Parser {
     if (peekIs(EQUAL)) {
       final var equal = next();
       final var binding = expr();
-      if (expr instanceof VarExpr(Token tok, String name)) {
-        return new AssignExpr(tok, name, binding);
+      if (expr instanceof VarExpr(Token tok, String name, _)) {
+        return new AssignExpr(tok, name, -1, binding);
       } else {
         throw new SyntaxError(equal, "Invalid assignment target.");
       }
@@ -357,7 +357,7 @@ public class Parser {
       case FALSE -> new BoolExpr(next(), false);
       case NUMBER -> new NumExpr(next(), tok.literal().get().asNumber());
       case STRING -> new StrExpr(next(), tok.literal().get().asString());
-      case IDENTIFIER -> new VarExpr(next(), tok.cargo());
+      case IDENTIFIER -> new VarExpr(next(), tok.cargo(), -1);
       case LEFT_PAREN -> {
         next();
         final var expr = expr();

@@ -54,12 +54,12 @@ public sealed interface AstNode {
       return String.format("(group %s)", expr);
     }
   }
-  record VarExpr(Token tok, String name) implements Expr {
+  record VarExpr(Token tok, String name, int scopeDepth) implements Expr {
     @Override public String toString() {
       return name;
     }
   }
-  record AssignExpr(Token tok, String name, Expr e) implements Expr {
+  record AssignExpr(Token tok, String name, int scopeDepth, Expr e) implements Expr {
     @Override public String toString() {
       return String.format("(assign %s %s)", name, e);
     }

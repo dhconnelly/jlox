@@ -21,15 +21,13 @@ public class Environment {
     values.put(name, value);
   }
 
-  public Optional<Value> assign(String name, Value value) {
+  public Value assign(String name, Value value) {
     if (values.containsKey(name)) {
       values.put(name, value);
-      return Optional.of(value);
+      return value;
     }
-    if (up.isPresent()) {
-      return up.get().assign(name, value);
-    }
-    return Optional.empty();
+    up.get().assign(name, value);
+    return value;
   }
 
   public Optional<Value> get(String name) {
@@ -37,5 +35,22 @@ public class Environment {
     if (value != null) return Optional.of(value);
     if (up.isPresent()) return up.get().get(name);
     return Optional.empty();
+  }
+
+  private Environment up(int depth) {
+    var env = this;
+    for (int i = 0; i < depth; i++) {
+      env = env.up.get();
+    }
+    return env;
+  }
+
+  public Value assignAt(int depth, String name, Value value) {
+    up(depth).values.put(name, value);
+    return value;
+  }
+
+  public Value getAt(int depth, String name) {
+    return up(depth).values.get(name);
   }
 }
