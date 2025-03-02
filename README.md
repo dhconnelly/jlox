@@ -12,7 +12,8 @@ An implementation of jlox, the first variant of the Lox language described in th
 
 This implementation diverges from the one in the book in the following ways:
 
--   extensive use of records, sealed interfaces, and pattern matching instead of the visitor pattern 
+-   extensive use of records, sealed interfaces, and pattern matching instead of the visitor pattern
+-   on-demand scanning
 -   synchronization is not implemented, so only the first syntax error is reported. (this requires
     some overrides to the test suite, which are applied by the makefile)
 -   uses a different driver and CLI so that it also satisfies the interface expected by the
@@ -23,6 +24,10 @@ This implementation diverges from the one in the book in the following ways:
 just once, to fetch dependencies and so on:
 
     make all
+
+to run the jlox test suite:
+
+    make suite
 
 there is a wrapper for the cli:
 
