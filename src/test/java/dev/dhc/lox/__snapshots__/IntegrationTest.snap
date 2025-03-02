@@ -113,6 +113,22 @@ dev.dhc.lox.IntegrationTest.testEvaluate[inputs/evaluate/values.lox]=[
 ]
 
 
+dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/classes.lox]=[
+  {
+    "code": 0,
+    "outLines": [
+      "Crunch crunch crunch!",
+      "Eggs a-fryin'!",
+      "Eggs a-fryin'!",
+      "Enjoy your breakfast, person.",
+      "Enjoy your breakfast, other person.",
+      "Eggs a-fryin'!"
+    ],
+    "errLines": [ ]
+  }
+]
+
+
 dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/control_flow.lox]=[
   {
     "code": 0,

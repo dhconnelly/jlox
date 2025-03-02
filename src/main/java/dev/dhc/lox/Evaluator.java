@@ -6,9 +6,11 @@ import dev.dhc.lox.AstNode.BinaryExpr;
 import dev.dhc.lox.AstNode.BlockStmt;
 import dev.dhc.lox.AstNode.BoolExpr;
 import dev.dhc.lox.AstNode.CallExpr;
+import dev.dhc.lox.AstNode.ClassDecl;
 import dev.dhc.lox.AstNode.Expr;
 import dev.dhc.lox.AstNode.ExprStmt;
 import dev.dhc.lox.AstNode.FunDecl;
+import dev.dhc.lox.AstNode.GetExpr;
 import dev.dhc.lox.AstNode.Grouping;
 import dev.dhc.lox.AstNode.IfElseStmt;
 import dev.dhc.lox.AstNode.NilExpr;
@@ -16,6 +18,7 @@ import dev.dhc.lox.AstNode.NumExpr;
 import dev.dhc.lox.AstNode.PrintStmt;
 import dev.dhc.lox.AstNode.Program;
 import dev.dhc.lox.AstNode.ReturnStmt;
+import dev.dhc.lox.AstNode.SetExpr;
 import dev.dhc.lox.AstNode.Stmt;
 import dev.dhc.lox.AstNode.StrExpr;
 import dev.dhc.lox.AstNode.UnaryExpr;
@@ -26,7 +29,9 @@ import dev.dhc.lox.AstNode.WhileStmt;
 import dev.dhc.lox.Error.RuntimeError;
 import dev.dhc.lox.Value.BoolValue;
 import dev.dhc.lox.Value.LoxCallable;
+import dev.dhc.lox.Value.LoxClass;
 import dev.dhc.lox.Value.LoxFunction;
+import dev.dhc.lox.Value.LoxInstance;
 import dev.dhc.lox.Value.LoxNativeFunction;
 import dev.dhc.lox.Value.NilValue;
 import dev.dhc.lox.Value.NumValue;
@@ -35,6 +40,7 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 public class Evaluator {
   private static final Value NIL = new NilValue();
@@ -148,11 +154,27 @@ public class Evaluator {
         while (isTruthy(evaluate(cond))) execute(body);
       }
       case FunDecl(_, var name, var params, List<Stmt> body) -> {
-        final var f = new LoxFunction(name.cargo(), env, params.stream().map(Token::cargo).toList(), body);
+        final var f = new LoxFunction(name.cargo(), env, cargo(params), body);
         env.define(name.cargo(), f);
       }
       case ReturnStmt(_, Expr result) -> throw new Return(evaluate(result));
+      case ClassDecl(_, Token className, List<FunDecl> methodDecls) -> {
+        env.define(className.cargo(), null);
+        var methods = methodDecls.stream()
+            .map(methodDecl -> toFunction(env, methodDecl))
+            .collect(Collectors.toMap(LoxFunction::name, id -> id));
+        var klass = new LoxClass(className.cargo(), methods);
+        env.assign(className.cargo(), klass);
+      }
     }
+  }
+
+  private static LoxFunction toFunction(Environment env, FunDecl method) {
+    return new LoxFunction(method.name().cargo(), env, cargo(method.params()), method.body());
+  }
+
+  private static List<String> cargo(List<Token> tokens) {
+    return tokens.stream().map(Token::cargo).toList();
   }
 
   private Error undefined(Token ident) {
@@ -215,6 +237,22 @@ public class Evaluator {
           throw error(tok, "Expected %d arguments but got %d.", f.arity(), a.size());
         }
         yield f.call(this, a);
+      }
+      case GetExpr(Token tok, Expr object, Token name) -> {
+        final var o = evaluate(object);
+        if (o instanceof LoxInstance instance) {
+          yield instance.get(name);
+        }
+        throw error(tok, "Only instances have properties.");
+      }
+      case SetExpr(Token tok, Expr objectExpr, Token name, Expr valueExpr) -> {
+        final var object = evaluate(objectExpr);
+        if (object instanceof LoxInstance instance) {
+          final var value = evaluate(valueExpr);
+          instance.set(name, value);
+          yield value;
+        }
+        throw error(tok, "Only instances have fields.");
       }
     };
   }

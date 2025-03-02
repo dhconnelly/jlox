@@ -86,6 +86,7 @@ public class IntegrationTest {
       "inputs/interpret/functions.lox",
       "inputs/interpret/counter.lox",
       "inputs/interpret/resolve.lox",
+      "inputs/interpret/classes.lox",
   })
   void testInterpret(String resource) {
     expect.scenario(resource).toMatchSnapshot(execute(new Run(resourcePath(resource))));

@@ -1,9 +1,12 @@
 package dev.dhc.lox;
 
 import dev.dhc.lox.AstNode.Stmt;
+import dev.dhc.lox.Error.RuntimeError;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public sealed interface Value {
   enum Type {
@@ -12,6 +15,8 @@ public sealed interface Value {
     NUM,
     STR,
     CALLABLE,
+    CLASS,
+    INSTANCE,
   }
 
   Type type();
@@ -20,10 +25,12 @@ public sealed interface Value {
     @Override public String toString() { return "nil"; }
     @Override public Type type() { return Type.NIL; }
   }
+
   record BoolValue(boolean value) implements Value {
     @Override public String toString() { return Boolean.toString(value); }
     @Override public Type type() { return Type.BOOL; }
   }
+
   record NumValue(double value) implements Value {
     @Override public String toString() {
       final var s = Double.toString(value);
@@ -31,14 +38,17 @@ public sealed interface Value {
     }
     @Override public Type type() { return Type.NUM; }
   }
+
   record StrValue(String value) implements Value {
     @Override public String toString() { return value; }
     @Override public Type type() { return Type.STR; }
   }
+
   sealed interface LoxCallable extends Value {
     int arity();
     Value call(Evaluator eval, List<Value> arguments);
   }
+
   record LoxNativeFunction(int arity, BiFunction<Evaluator, List<Value>, Value> f) implements LoxCallable {
     @Override public String toString() { return "<native fn>"; }
     @Override public Type type() { return Type.CALLABLE; }
@@ -46,6 +56,7 @@ public sealed interface Value {
       return f.apply(eval, arguments);
     }
   }
+
   record LoxFunction(String name, Environment closure, List<String> params, List<Stmt> body)
       implements LoxCallable {
     @Override public String toString() { return String.format("<fn %s>", name); }
@@ -53,6 +64,44 @@ public sealed interface Value {
     @Override public Type type() { return Type.CALLABLE; }
     @Override public Value call(Evaluator eval, List<Value> arguments) {
       return eval.call(this, closure, arguments);
+    }
+  }
+
+  record LoxClass(String name, Map<String, LoxFunction> methods) implements Value, LoxCallable {
+    @Override public String toString() { return name; }
+    @Override public Type type() {return Type.CLASS;}
+    @Override public int arity() {return 0;}
+    @Override public Value call(Evaluator eval, List<Value> arguments) {
+      return new LoxInstance(this);
+    }
+    public Optional<LoxFunction> findMethod(String name) {
+      return methods.containsKey(name) ? Optional.of(methods.get(name)) : Optional.empty();
+    }
+  }
+
+  final class LoxInstance implements Value {
+    private final LoxClass klass;
+    private final Map<String, Value> fields = new HashMap<>();
+
+    LoxInstance(LoxClass klass) {
+      this.klass = klass;
+    }
+
+    @Override public String toString() { return String.format("%s instance", klass.name); }
+    @Override public Type type() {return Type.INSTANCE;}
+
+    public Value get(Token name) {
+      if (fields.containsKey(name.cargo())) {
+        return fields.get(name.cargo());
+      }
+
+      var method = klass.findMethod(name.cargo());
+      return method.orElseThrow(() ->
+          new RuntimeError(name.line(), String.format("Undefined property '%s'.", name.cargo())));
+    }
+
+    public void set(Token name, Value value) {
+      fields.put(name.cargo(), value);
     }
   }
 }

@@ -6,9 +6,11 @@ import dev.dhc.lox.AstNode.BinaryExpr;
 import dev.dhc.lox.AstNode.BlockStmt;
 import dev.dhc.lox.AstNode.BoolExpr;
 import dev.dhc.lox.AstNode.CallExpr;
+import dev.dhc.lox.AstNode.ClassDecl;
 import dev.dhc.lox.AstNode.Expr;
 import dev.dhc.lox.AstNode.ExprStmt;
 import dev.dhc.lox.AstNode.FunDecl;
+import dev.dhc.lox.AstNode.GetExpr;
 import dev.dhc.lox.AstNode.Grouping;
 import dev.dhc.lox.AstNode.IfElseStmt;
 import dev.dhc.lox.AstNode.NilExpr;
@@ -16,6 +18,7 @@ import dev.dhc.lox.AstNode.NumExpr;
 import dev.dhc.lox.AstNode.PrintStmt;
 import dev.dhc.lox.AstNode.Program;
 import dev.dhc.lox.AstNode.ReturnStmt;
+import dev.dhc.lox.AstNode.SetExpr;
 import dev.dhc.lox.AstNode.Stmt;
 import dev.dhc.lox.AstNode.StrExpr;
 import dev.dhc.lox.AstNode.UnaryExpr;
@@ -36,7 +39,8 @@ public class Resolver {
 
   private enum FunctionType {
     NONE,
-    FUNCTION
+    FUNCTION,
+    METHOD,
   }
   private FunctionType currentFunction = FunctionType.NONE;
 
@@ -105,6 +109,13 @@ public class Resolver {
         yield new CallExpr(tok, f, a);
       }
 
+      case SetExpr(Token tok, Expr object, Token name, Expr value) -> {
+        var value2 = resolve(value);
+        var object2 = resolve(object);
+        yield new SetExpr(tok, object2, name, value2);
+      }
+
+      case GetExpr(Token tok, Expr object, Token name) -> new GetExpr(tok, resolve(object), name);
       case BoolExpr(_, _), NilExpr(_), NumExpr(_, _), StrExpr(_, _) -> expr;
       case Grouping(Token tok, Expr e) -> new Grouping(tok, resolve(e));
       case UnaryExpr(Token tok, UnaryOp op, Expr e) -> new UnaryExpr(tok, op, resolve(e));
@@ -158,6 +169,18 @@ public class Resolver {
         var init2 = init.map(this::resolve);
         define(name);
         yield new VarDecl(tok, name, init2);
+      }
+
+      case ClassDecl(Token tok, Token name, List<FunDecl> methods) -> {
+        declare(name);
+        define(name);
+        var methods2 = methods.stream()
+            .map(method -> {
+              var body = resolveFunction(method.params(), method.body(), FunctionType.METHOD);
+              return new FunDecl(method.tok(), method.name(), method.params(), body);
+            })
+            .toList();
+        yield new ClassDecl(tok, name, methods2);
       }
 
       case WhileStmt(Token tok, Expr cond, Stmt body) -> {

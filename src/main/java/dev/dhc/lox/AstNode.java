@@ -69,6 +69,8 @@ public sealed interface AstNode {
       return String.format("(call %s %s)", callee, arguments);
     }
   }
+  record GetExpr(Token tok, Expr object, Token name) implements Expr {}
+  record SetExpr(Token tok, Expr object, Token name, Expr value) implements Expr {}
 
   sealed interface Stmt extends AstNode {}
   record VarDecl(Token tok, Token name, Optional<Expr> init) implements Stmt {}
@@ -79,6 +81,7 @@ public sealed interface AstNode {
   record IfElseStmt(Token tok, Expr cond, Stmt conseq, Optional<Stmt> alt) implements Stmt {}
   record WhileStmt(Token tok, Expr cond, Stmt body) implements Stmt {}
   record ReturnStmt(Token tok, Expr expr) implements Stmt {}
+  record ClassDecl(Token tok, Token name, List<FunDecl> methods) implements Stmt {}
 
   record Program(List<Stmt> stmts) {}
 }

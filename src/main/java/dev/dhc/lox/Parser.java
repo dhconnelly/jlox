@@ -3,7 +3,9 @@ package dev.dhc.lox;
 import static dev.dhc.lox.Token.Type.AND;
 import static dev.dhc.lox.Token.Type.BANG;
 import static dev.dhc.lox.Token.Type.BANG_EQUAL;
+import static dev.dhc.lox.Token.Type.CLASS;
 import static dev.dhc.lox.Token.Type.COMMA;
+import static dev.dhc.lox.Token.Type.DOT;
 import static dev.dhc.lox.Token.Type.ELSE;
 import static dev.dhc.lox.Token.Type.EQUAL;
 import static dev.dhc.lox.Token.Type.EQUAL_EQUAL;
@@ -31,9 +33,11 @@ import dev.dhc.lox.AstNode.BinaryExpr;
 import dev.dhc.lox.AstNode.BlockStmt;
 import dev.dhc.lox.AstNode.BoolExpr;
 import dev.dhc.lox.AstNode.CallExpr;
+import dev.dhc.lox.AstNode.ClassDecl;
 import dev.dhc.lox.AstNode.Expr;
 import dev.dhc.lox.AstNode.ExprStmt;
 import dev.dhc.lox.AstNode.FunDecl;
+import dev.dhc.lox.AstNode.GetExpr;
 import dev.dhc.lox.AstNode.Grouping;
 import dev.dhc.lox.AstNode.IfElseStmt;
 import dev.dhc.lox.AstNode.NilExpr;
@@ -41,6 +45,7 @@ import dev.dhc.lox.AstNode.NumExpr;
 import dev.dhc.lox.AstNode.PrintStmt;
 import dev.dhc.lox.AstNode.Program;
 import dev.dhc.lox.AstNode.ReturnStmt;
+import dev.dhc.lox.AstNode.SetExpr;
 import dev.dhc.lox.AstNode.Stmt;
 import dev.dhc.lox.AstNode.StrExpr;
 import dev.dhc.lox.AstNode.UnaryExpr;
@@ -160,13 +165,13 @@ public class Parser {
     };
   }
 
-  public Stmt exprStmt() {
+  private Stmt exprStmt() {
     final var e = peekIs(SEMICOLON) ? new NilExpr(peek()) : expr();
     eat(SEMICOLON, "Expected ; after expression");
     return new ExprStmt(e.tok(), e);
   }
 
-  public Stmt varDecl() {
+  private Stmt varDecl() {
     final var tok = eat(VAR, "Expected 'var'");
     final var name = eat(IDENTIFIER, "Expect variable name.");
     var init = Optional.<Expr>empty();
@@ -178,9 +183,9 @@ public class Parser {
     return new VarDecl(tok, name, init);
   }
 
-  public Stmt function() {
-    final var name = eat(IDENTIFIER, "Expect function name");
-    eat(LEFT_PAREN, "Expect '(' after function name");
+  private FunDecl function(String type) {
+    final var name = eat(IDENTIFIER, String.format("Expect %s name", type));
+    eat(LEFT_PAREN, String.format("Expect '(' after %s name", type));
     final var params = new ArrayList<Token>();
     while (!peekIs(RIGHT_PAREN)) {
       if (!params.isEmpty()) eat(COMMA, "Expect ')' after parameters.");
@@ -191,17 +196,32 @@ public class Parser {
       params.add(param);
     }
     eat(RIGHT_PAREN, "Expect '(' after parameters");
-    if (!peekIs(LEFT_BRACE)) throw new SyntaxError(peek(), "Expect '{' before function body.");
+    if (!peekIs(LEFT_BRACE)) {
+      throw new SyntaxError(peek(), String.format("Expect '{' before %s body.", type));
+    }
     final var body = block();
     return new FunDecl(name, name, params, body);
   }
 
-  public Stmt funDecl() {
+  private Stmt funDecl() {
     eat(FUN, "Expect 'fun'");
-    return function();
+    return function("function");
+  }
+
+  private Stmt classDecl() {
+    final var tok = eat(CLASS, "Expect 'class'.");
+    final var name = eat(IDENTIFIER, "Expect class name.");
+    eat(LEFT_BRACE, "Expect '{' before class body.");
+    final var methods = new ArrayList<FunDecl>();
+    while (!eof() && !peekIs(RIGHT_BRACE)) {
+      methods.add(function("method"));
+    }
+    eat(RIGHT_BRACE, "Expect '}' after class body");
+    return new ClassDecl(tok, name, methods);
   }
 
   public Stmt stmt() {
+    if (peekIs(CLASS)) return classDecl();
     if (peekIs(VAR)) return varDecl();
     if (peekIs(FUN)) return funDecl();
     return innerStmt();
@@ -244,6 +264,8 @@ public class Parser {
       final var binding = expr();
       if (expr instanceof VarExpr(Token tok, String name, _)) {
         return new AssignExpr(tok, name, -1, binding);
+      } else if (expr instanceof GetExpr(Token tok, Expr object, Token name)) {
+        return new SetExpr(tok, object, name, binding);
       } else {
         throw new SyntaxError(equal, "Invalid assignment target.");
       }
@@ -331,20 +353,31 @@ public class Parser {
 
   private Expr call() {
     var expr = primary();
-    while (peekIs(LEFT_PAREN)) {
-      next();
-      final var args = new ArrayList<Expr>();
-      while (!peekIs(RIGHT_PAREN)) {
-        if (!args.isEmpty()) {
-          eat(COMMA, "Expect ',' after argument");
+    while (true) {
+      if (peekIs(LEFT_PAREN)) {
+        // handle call
+        next();
+        final var args = new ArrayList<Expr>();
+        while (!peekIs(RIGHT_PAREN)) {
+          if (!args.isEmpty()) {
+            eat(COMMA, "Expect ',' after argument");
+          }
+          if (args.size() >= MAX_ARGS) {
+            throw new SyntaxError(peek(), String.format("Can't have more than %d arguments.", MAX_ARGS));
+          }
+          args.add(expr());
         }
-        if (args.size() >= MAX_ARGS) {
-          throw new SyntaxError(peek(), String.format("Can't have more than %d arguments.", MAX_ARGS));
-        }
-        args.add(expr());
+        eat(RIGHT_PAREN, "Expect ')' after arguments.");
+        expr = new CallExpr(expr.tok(), expr, args);
+      } else if (peekIs(DOT)) {
+        // handle get
+        next();
+        var name = eat(IDENTIFIER, "Expect property name after '.'.");
+        expr = new GetExpr(expr.tok(), expr, name);
+      } else {
+        // done
+        break;
       }
-      eat(RIGHT_PAREN, "Expect ')' after arguments.");
-      expr = new CallExpr(expr.tok(), expr, args);
     }
     return expr;
   }

@@ -7,7 +7,7 @@ An implementation of jlox, the first variant of the Lox language described in th
 
 - [x] codecrafters interpreter challenge (ch. 1-10 of the book)
 - [ ] full jlox compliance (ch. 11-13 of the book)
-- [ ] aot compiler to java bytecode
+- [ ] jvm bytecode compiler
 
 ## overview
 

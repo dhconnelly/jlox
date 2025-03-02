@@ -1,7 +1,5 @@
 package dev.dhc.lox;
 
-import dev.dhc.lox.Error.RuntimeError;
-import dev.dhc.lox.Error.SyntaxError;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;

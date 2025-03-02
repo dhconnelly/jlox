@@ -1,0 +1,24 @@
+class Bacon {
+  eat() {
+    print "Crunch crunch crunch!";
+  }
+}
+
+Bacon().eat(); // Prints "Crunch crunch crunch!".
+
+class Breakfast {
+  cook() {
+    print "Eggs a-fryin'!";
+  }
+
+  serve(who) {
+    print "Enjoy your breakfast, " + who + ".";
+  }
+}
+
+var b = Breakfast();
+b.cook();
+b.cook();
+b.serve("person");
+b.serve("other person");
+b.cook();
