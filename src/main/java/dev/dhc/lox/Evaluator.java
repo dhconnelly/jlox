@@ -21,6 +21,7 @@ import dev.dhc.lox.AstNode.ReturnStmt;
 import dev.dhc.lox.AstNode.SetExpr;
 import dev.dhc.lox.AstNode.Stmt;
 import dev.dhc.lox.AstNode.StrExpr;
+import dev.dhc.lox.AstNode.ThisExpr;
 import dev.dhc.lox.AstNode.UnaryExpr;
 import dev.dhc.lox.AstNode.UnaryOp;
 import dev.dhc.lox.AstNode.VarDecl;
@@ -181,9 +182,9 @@ public class Evaluator {
     return error(ident, "Undefined variable '%s'.", ident.cargo());
   }
 
-  private Value lookup(Token at, VarExpr lookupExpr, String name) {
-    return lookupExpr.scopeDepth() >= 0
-        ? env.getAt(lookupExpr.scopeDepth(), name)
+  private Value lookup(Token at, int depth, String name) {
+    return depth >= 0
+        ? env.getAt(depth, name)
         : globals.get(name).orElseThrow(() -> undefined(at));
   }
 
@@ -200,7 +201,7 @@ public class Evaluator {
       case NumExpr(_, double value) -> new NumValue(value);
       case NilExpr(_) -> new NilValue();
       case Grouping(_, Expr e) -> evaluate(e);
-      case VarExpr e -> lookup(e.tok(), e, e.tok().cargo());
+      case VarExpr e -> lookup(e.tok(), e.scopeDepth(), e.tok().cargo());
       case AssignExpr e -> assign(e, e.name(), evaluate(e.e()));
       case UnaryExpr(_, UnaryOp op, Expr e) -> switch (op) {
         case BANG -> new BoolValue(!isTruthy(evaluate(e)));
@@ -254,6 +255,7 @@ public class Evaluator {
         }
         throw error(tok, "Only instances have fields.");
       }
+      case ThisExpr(Token tok, int depth) -> lookup(tok, depth, "this");
     };
   }
 }

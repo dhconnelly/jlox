@@ -71,6 +71,7 @@ public sealed interface AstNode {
   }
   record GetExpr(Token tok, Expr object, Token name) implements Expr {}
   record SetExpr(Token tok, Expr object, Token name, Expr value) implements Expr {}
+  record ThisExpr(Token tok, int scopeDepth) implements Expr {}
 
   sealed interface Stmt extends AstNode {}
   record VarDecl(Token tok, Token name, Optional<Expr> init) implements Stmt {}

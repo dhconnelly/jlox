@@ -122,7 +122,8 @@ dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/classes.lox]=[
       "Eggs a-fryin'!",
       "Enjoy your breakfast, person.",
       "Enjoy your breakfast, other person.",
-      "Eggs a-fryin'!"
+      "Eggs a-fryin'!",
+      "The German chocolate cake is delicious!"
     ],
     "errLines": [ ]
   }

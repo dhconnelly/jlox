@@ -21,6 +21,7 @@ import dev.dhc.lox.AstNode.ReturnStmt;
 import dev.dhc.lox.AstNode.SetExpr;
 import dev.dhc.lox.AstNode.Stmt;
 import dev.dhc.lox.AstNode.StrExpr;
+import dev.dhc.lox.AstNode.ThisExpr;
 import dev.dhc.lox.AstNode.UnaryExpr;
 import dev.dhc.lox.AstNode.UnaryOp;
 import dev.dhc.lox.AstNode.VarDecl;
@@ -43,6 +44,12 @@ public class Resolver {
     METHOD,
   }
   private FunctionType currentFunction = FunctionType.NONE;
+
+  private enum ClassType {
+    NONE,
+    CLASS,
+  }
+  private ClassType currentClass = ClassType.NONE;
 
   public Program resolve(Program program) {
     return new Program(program.stmts().stream().map(this::resolve).toList());
@@ -72,7 +79,7 @@ public class Resolver {
     scopes.peek().put(name.cargo(), true);
   }
 
-  private int resolveLocal(Expr expr, String name) {
+  private int resolveLocal(String name) {
     for (int i = scopes.size()-1; i >= 0; i--) {
       if (scopes.get(i).containsKey(name)) {
         return scopes.size()-1-i;
@@ -87,13 +94,13 @@ public class Resolver {
         if (!scopes.empty() && scopes.peek().get(varExpr.name()) == Boolean.FALSE) {
           throw new SyntaxError(varExpr.tok(), "Can't read local variable in its own initializer.");
         }
-        int depth = resolveLocal(varExpr, varExpr.name());
+        int depth = resolveLocal(varExpr.name());
         yield new VarExpr(varExpr.tok(), varExpr.name(), depth);
       }
 
       case AssignExpr assignExpr -> {
         var e = resolve(assignExpr.e());
-        var depth = resolveLocal(assignExpr, assignExpr.name());
+        var depth = resolveLocal(assignExpr.name());
         yield new AssignExpr(assignExpr.tok(), assignExpr.name(), depth, e);
       }
 
@@ -119,6 +126,12 @@ public class Resolver {
       case BoolExpr(_, _), NilExpr(_), NumExpr(_, _), StrExpr(_, _) -> expr;
       case Grouping(Token tok, Expr e) -> new Grouping(tok, resolve(e));
       case UnaryExpr(Token tok, UnaryOp op, Expr e) -> new UnaryExpr(tok, op, resolve(e));
+      case ThisExpr(Token tok, _) -> {
+        if (currentClass == ClassType.NONE) {
+          throw new SyntaxError(tok, "Can't use 'this' outside of a class.");
+        }
+        yield new ThisExpr(tok, resolveLocal("this"));
+      }
     };
   }
 
@@ -172,14 +185,22 @@ public class Resolver {
       }
 
       case ClassDecl(Token tok, Token name, List<FunDecl> methods) -> {
+        var currentClass = this.currentClass;
+        this.currentClass = ClassType.CLASS;
+
         declare(name);
         define(name);
+        beginScope();
+        scopes.peek().put("this", true);
         var methods2 = methods.stream()
             .map(method -> {
               var body = resolveFunction(method.params(), method.body(), FunctionType.METHOD);
               return new FunDecl(method.tok(), method.name(), method.params(), body);
             })
             .toList();
+        endScope();
+
+        this.currentClass = currentClass;
         yield new ClassDecl(tok, name, methods2);
       }
 

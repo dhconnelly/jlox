@@ -48,6 +48,7 @@ import dev.dhc.lox.AstNode.ReturnStmt;
 import dev.dhc.lox.AstNode.SetExpr;
 import dev.dhc.lox.AstNode.Stmt;
 import dev.dhc.lox.AstNode.StrExpr;
+import dev.dhc.lox.AstNode.ThisExpr;
 import dev.dhc.lox.AstNode.UnaryExpr;
 import dev.dhc.lox.AstNode.UnaryOp;
 import dev.dhc.lox.AstNode.VarDecl;
@@ -391,6 +392,7 @@ public class Parser {
       case NUMBER -> new NumExpr(next(), tok.literal().get().asNumber());
       case STRING -> new StrExpr(next(), tok.literal().get().asString());
       case IDENTIFIER -> new VarExpr(next(), tok.cargo(), -1);
+      case THIS -> new ThisExpr(next(), -1);
       case LEFT_PAREN -> {
         next();
         final var expr = expr();

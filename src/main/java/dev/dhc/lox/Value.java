@@ -65,6 +65,11 @@ public sealed interface Value {
     @Override public Value call(Evaluator eval, List<Value> arguments) {
       return eval.call(this, closure, arguments);
     }
+    public LoxFunction bind(LoxInstance instance) {
+      var env = new Environment(closure);
+      env.define("this", instance);
+      return new LoxFunction(name, env, params, body);
+    }
   }
 
   record LoxClass(String name, Map<String, LoxFunction> methods) implements Value, LoxCallable {
@@ -95,7 +100,7 @@ public sealed interface Value {
         return fields.get(name.cargo());
       }
 
-      var method = klass.findMethod(name.cargo());
+      var method = klass.findMethod(name.cargo()).map(m -> m.bind(this));
       return method.orElseThrow(() ->
           new RuntimeError(name.line(), String.format("Undefined property '%s'.", name.cargo())));
     }
