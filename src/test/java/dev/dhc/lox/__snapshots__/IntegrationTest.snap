@@ -205,6 +205,17 @@ dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/functions.lox]=[
 ]
 
 
+dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/inheritance.lox]=[
+  {
+    "code": 0,
+    "outLines": [
+      "Fry until golden brown."
+    ],
+    "errLines": [ ]
+  }
+]
+
+
 dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/resolve.lox]=[
   {
     "code": 0,

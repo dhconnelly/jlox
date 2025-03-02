@@ -82,7 +82,7 @@ public sealed interface AstNode {
   record IfElseStmt(Token tok, Expr cond, Stmt conseq, Optional<Stmt> alt) implements Stmt {}
   record WhileStmt(Token tok, Expr cond, Stmt body) implements Stmt {}
   record ReturnStmt(Token tok, Expr expr) implements Stmt {}
-  record ClassDecl(Token tok, Token name, List<FunDecl> methods) implements Stmt {}
+  record ClassDecl(Token tok, Token name, Optional<VarExpr> superclass, List<FunDecl> methods) implements Stmt {}
 
   record Program(List<Stmt> stmts) {}
 }

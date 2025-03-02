@@ -89,8 +89,10 @@ public class Resolver {
     return -1;
   }
 
-  public Expr resolve(Expr expr) {
-    return switch (expr) {
+  public <T extends Expr> T resolve(T expr) {
+    // eye-roll
+    //noinspection unchecked
+    return (T) switch (expr) {
       case VarExpr varExpr -> {
         if (!scopes.empty() && scopes.peek().get(varExpr.name()) == Boolean.FALSE) {
           throw new SyntaxError(varExpr.tok(), "Can't read local variable in its own initializer.");
@@ -185,12 +187,19 @@ public class Resolver {
         yield new VarDecl(tok, name, init2);
       }
 
-      case ClassDecl(Token tok, Token name, List<FunDecl> methods) -> {
+      case ClassDecl(Token tok, Token name, Optional<VarExpr> superclass, List<FunDecl> methods) -> {
         var currentClass = this.currentClass;
         this.currentClass = ClassType.CLASS;
 
         declare(name);
         define(name);
+
+        if (superclass.map(sc -> sc.name().equals(name.cargo())).orElse(false)) {
+          throw new SyntaxError(tok, "A class can't inherit from itself.");
+        }
+
+        var superclass2 = superclass.map(this::resolve);
+
         beginScope();
         scopes.peek().put("this", true);
         var methods2 = methods.stream()
@@ -205,7 +214,7 @@ public class Resolver {
         endScope();
 
         this.currentClass = currentClass;
-        yield new ClassDecl(tok, name, methods2);
+        yield new ClassDecl(tok, name, superclass2, methods2);
       }
 
       case WhileStmt(Token tok, Expr cond, Stmt body) -> {

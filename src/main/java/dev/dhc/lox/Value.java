@@ -78,7 +78,7 @@ public sealed interface Value {
     }
   }
 
-  record LoxClass(String name, Map<String, LoxFunction> methods) implements Value, LoxCallable {
+  record LoxClass(String name, Optional<LoxClass> superclass, Map<String, LoxFunction> methods) implements Value, LoxCallable {
     @Override public String toString() { return name; }
     @Override public Type type() {return Type.CLASS;}
     @Override public int arity() {return findMethod("init").map(LoxFunction::arity).orElse(0);}
@@ -88,7 +88,8 @@ public sealed interface Value {
       return instance;
     }
     public Optional<LoxFunction> findMethod(String name) {
-      return methods.containsKey(name) ? Optional.of(methods.get(name)) : Optional.empty();
+      return Optional.ofNullable(methods.get(name))
+          .or(() -> superclass.flatMap(sc -> sc.findMethod(name)));
     }
   }
 

@@ -212,13 +212,21 @@ public class Parser {
   private Stmt classDecl() {
     final var tok = eat(CLASS, "Expect 'class'.");
     final var name = eat(IDENTIFIER, "Expect class name.");
+
+    Optional<VarExpr> superclass = Optional.empty();
+    if (peekIs(LESS)) {
+      next();
+      var superclassName = eat(IDENTIFIER, "Expect superclass name.");
+      superclass = Optional.of(new VarExpr(superclassName, superclassName.cargo(), -1));
+    }
+
     eat(LEFT_BRACE, "Expect '{' before class body.");
     final var methods = new ArrayList<FunDecl>();
     while (!eof() && !peekIs(RIGHT_BRACE)) {
       methods.add(function("method"));
     }
     eat(RIGHT_BRACE, "Expect '}' after class body");
-    return new ClassDecl(tok, name, methods);
+    return new ClassDecl(tok, name, superclass, methods);
   }
 
   public Stmt stmt() {

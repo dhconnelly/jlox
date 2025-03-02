@@ -160,12 +160,16 @@ public class Evaluator {
         env.define(name.cargo(), f);
       }
       case ReturnStmt(_, Expr result) -> throw new Return(evaluate(result));
-      case ClassDecl(_, Token className, List<FunDecl> methodDecls) -> {
+      case ClassDecl(_, Token className, Optional<VarExpr> superclassName, List<FunDecl> methodDecls) -> {
+        var superclass = superclassName.map(this::evaluate);
+        if (superclass.map(sc -> !(sc instanceof LoxClass)).orElse(false)) {
+          throw error(className, "Superclass must be a class.");
+        }
         env.define(className.cargo(), null);
         var methods = methodDecls.stream()
             .map(methodDecl -> methodFunction(env, methodDecl))
             .collect(Collectors.toMap(LoxFunction::name, id -> id));
-        var klass = new LoxClass(className.cargo(), methods);
+        var klass = new LoxClass(className.cargo(), superclass.map(sc -> (LoxClass) sc), methods);
         env.assign(className.cargo(), klass);
       }
     }
