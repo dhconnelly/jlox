@@ -29,6 +29,7 @@ import dev.dhc.lox.AstNode.VarExpr;
 import dev.dhc.lox.AstNode.WhileStmt;
 import dev.dhc.lox.Error.RuntimeError;
 import dev.dhc.lox.Value.BoolValue;
+import dev.dhc.lox.Value.FunctionType;
 import dev.dhc.lox.Value.LoxCallable;
 import dev.dhc.lox.Value.LoxClass;
 import dev.dhc.lox.Value.LoxFunction;
@@ -155,14 +156,14 @@ public class Evaluator {
         while (isTruthy(evaluate(cond))) execute(body);
       }
       case FunDecl(_, var name, var params, List<Stmt> body) -> {
-        final var f = new LoxFunction(name.cargo(), env, cargo(params), body);
+        final var f = new LoxFunction(name.cargo(), env, cargo(params), body, FunctionType.FUNCTION);
         env.define(name.cargo(), f);
       }
       case ReturnStmt(_, Expr result) -> throw new Return(evaluate(result));
       case ClassDecl(_, Token className, List<FunDecl> methodDecls) -> {
         env.define(className.cargo(), null);
         var methods = methodDecls.stream()
-            .map(methodDecl -> toFunction(env, methodDecl))
+            .map(methodDecl -> methodFunction(env, methodDecl))
             .collect(Collectors.toMap(LoxFunction::name, id -> id));
         var klass = new LoxClass(className.cargo(), methods);
         env.assign(className.cargo(), klass);
@@ -170,8 +171,10 @@ public class Evaluator {
     }
   }
 
-  private static LoxFunction toFunction(Environment env, FunDecl method) {
-    return new LoxFunction(method.name().cargo(), env, cargo(method.params()), method.body());
+  private static LoxFunction methodFunction(Environment env, FunDecl method) {
+    return new LoxFunction(
+        method.name().cargo(), env, cargo(method.params()), method.body(),
+        method.name().cargo().equals("init") ? FunctionType.INITIALIZER : FunctionType.FUNCTION);
   }
 
   private static List<String> cargo(List<Token> tokens) {

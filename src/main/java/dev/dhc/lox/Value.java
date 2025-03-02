@@ -57,27 +57,35 @@ public sealed interface Value {
     }
   }
 
-  record LoxFunction(String name, Environment closure, List<String> params, List<Stmt> body)
+  enum FunctionType {
+    FUNCTION,
+    INITIALIZER,
+  }
+
+  record LoxFunction(String name, Environment closure, List<String> params, List<Stmt> body, FunctionType ftype)
       implements LoxCallable {
     @Override public String toString() { return String.format("<fn %s>", name); }
     @Override public int arity() { return params.size(); }
     @Override public Type type() { return Type.CALLABLE; }
     @Override public Value call(Evaluator eval, List<Value> arguments) {
-      return eval.call(this, closure, arguments);
+      var returnValue = eval.call(this, closure, arguments);
+      return (ftype == FunctionType.INITIALIZER) ? closure.getAt(0, "this") : returnValue;
     }
     public LoxFunction bind(LoxInstance instance) {
       var env = new Environment(closure);
       env.define("this", instance);
-      return new LoxFunction(name, env, params, body);
+      return new LoxFunction(name, env, params, body, ftype);
     }
   }
 
   record LoxClass(String name, Map<String, LoxFunction> methods) implements Value, LoxCallable {
     @Override public String toString() { return name; }
     @Override public Type type() {return Type.CLASS;}
-    @Override public int arity() {return 0;}
-    @Override public Value call(Evaluator eval, List<Value> arguments) {
-      return new LoxInstance(this);
+    @Override public int arity() {return findMethod("init").map(LoxFunction::arity).orElse(0);}
+    @Override public Value call(Evaluator eval, List<Value> args) {
+      var instance = new LoxInstance(this);
+      findMethod("init").ifPresent(init -> init.bind(instance).call(eval, args));
+      return instance;
     }
     public Optional<LoxFunction> findMethod(String name) {
       return methods.containsKey(name) ? Optional.of(methods.get(name)) : Optional.empty();

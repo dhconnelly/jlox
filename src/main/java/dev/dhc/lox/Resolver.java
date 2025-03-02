@@ -41,6 +41,7 @@ public class Resolver {
   private enum FunctionType {
     NONE,
     FUNCTION,
+    INITIALIZER,
     METHOD,
   }
   private FunctionType currentFunction = FunctionType.NONE;
@@ -194,7 +195,10 @@ public class Resolver {
         scopes.peek().put("this", true);
         var methods2 = methods.stream()
             .map(method -> {
-              var body = resolveFunction(method.params(), method.body(), FunctionType.METHOD);
+              var ftype = method.name().cargo().equals("init")
+                  ? FunctionType.INITIALIZER
+                  : FunctionType.METHOD;
+              var body = resolveFunction(method.params(), method.body(), ftype);
               return new FunDecl(method.tok(), method.name(), method.params(), body);
             })
             .toList();
@@ -215,6 +219,8 @@ public class Resolver {
       case ReturnStmt(Token tok, Expr expr) -> {
         if (currentFunction == FunctionType.NONE) {
           throw new SyntaxError(tok, "Can't return from top-level code.");
+        } else if (currentFunction == FunctionType.INITIALIZER && !(expr instanceof NilExpr)) {
+          throw new SyntaxError(tok, "Can't return a value from an initializer.");
         }
         yield new ReturnStmt(tok, resolve(expr));
       }
