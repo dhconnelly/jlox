@@ -21,6 +21,7 @@ import dev.dhc.lox.AstNode.ReturnStmt;
 import dev.dhc.lox.AstNode.SetExpr;
 import dev.dhc.lox.AstNode.Stmt;
 import dev.dhc.lox.AstNode.StrExpr;
+import dev.dhc.lox.AstNode.SuperExpr;
 import dev.dhc.lox.AstNode.ThisExpr;
 import dev.dhc.lox.AstNode.UnaryExpr;
 import dev.dhc.lox.AstNode.UnaryOp;
@@ -49,6 +50,7 @@ public class Resolver {
   private enum ClassType {
     NONE,
     CLASS,
+    SUBCLASS,
   }
   private ClassType currentClass = ClassType.NONE;
 
@@ -135,6 +137,14 @@ public class Resolver {
         }
         yield new ThisExpr(tok, resolveLocal("this"));
       }
+      case SuperExpr(Token tok, Token method, _) -> {
+        if (currentClass == ClassType.NONE) {
+          throw new SyntaxError(tok, "Can't use 'super' outside of a class.");
+        } else if (currentClass != ClassType.SUBCLASS) {
+          throw new SyntaxError(tok, "Can't use 'super' in a class with no superclass.");
+        }
+        yield new SuperExpr(tok, method, resolveLocal("super"));
+      }
     };
   }
 
@@ -195,10 +205,16 @@ public class Resolver {
         define(name);
 
         if (superclass.map(sc -> sc.name().equals(name.cargo())).orElse(false)) {
-          throw new SyntaxError(tok, "A class can't inherit from itself.");
+          throw new SyntaxError(name, "A class can't inherit from itself.");
         }
 
         var superclass2 = superclass.map(this::resolve);
+
+        if (superclass2.isPresent()) {
+          beginScope();
+          this.currentClass = ClassType.SUBCLASS;
+          scopes.peek().put("super", true);
+        }
 
         beginScope();
         scopes.peek().put("this", true);
@@ -212,6 +228,10 @@ public class Resolver {
             })
             .toList();
         endScope();
+
+        if (superclass2.isPresent()) {
+          endScope();
+        }
 
         this.currentClass = currentClass;
         yield new ClassDecl(tok, name, superclass2, methods2);

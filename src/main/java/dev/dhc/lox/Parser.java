@@ -48,6 +48,7 @@ import dev.dhc.lox.AstNode.ReturnStmt;
 import dev.dhc.lox.AstNode.SetExpr;
 import dev.dhc.lox.AstNode.Stmt;
 import dev.dhc.lox.AstNode.StrExpr;
+import dev.dhc.lox.AstNode.SuperExpr;
 import dev.dhc.lox.AstNode.ThisExpr;
 import dev.dhc.lox.AstNode.UnaryExpr;
 import dev.dhc.lox.AstNode.UnaryOp;
@@ -401,6 +402,12 @@ public class Parser {
       case STRING -> new StrExpr(next(), tok.literal().get().asString());
       case IDENTIFIER -> new VarExpr(next(), tok.cargo(), -1);
       case THIS -> new ThisExpr(next(), -1);
+      case SUPER -> {
+        next();
+        eat(DOT, "Expect '.' after 'super'.");
+        var method = eat(IDENTIFIER, "Expect superclass method name.");
+        yield new SuperExpr(tok, method, -1);
+      }
       case LEFT_PAREN -> {
         next();
         final var expr = expr();

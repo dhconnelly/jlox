@@ -5,8 +5,10 @@ An implementation of jlox, the first variant of the Lox language described in th
 
 ## status
 
+done
+
 - [x] codecrafters interpreter challenge (ch. 1-10 of the book)
-- [ ] full jlox compliance (ch. 11-13 of the book)
+- [x] full jlox compliance (ch. 11-13 of the book) with overrides applied (see below)
 
 ## overview
 

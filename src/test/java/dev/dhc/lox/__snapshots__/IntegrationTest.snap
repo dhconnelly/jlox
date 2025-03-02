@@ -209,7 +209,9 @@ dev.dhc.lox.IntegrationTest.testInterpret[inputs/interpret/inheritance.lox]=[
   {
     "code": 0,
     "outLines": [
-      "Fry until golden brown."
+      "Fry until golden brown.",
+      "Pipe full of custard and coat with chocolate.",
+      "A method"
     ],
     "errLines": [ ]
   }

@@ -18,5 +18,5 @@ test:
 
 suite: build
 	./overrides/apply_overrides.sh craftinginterpreters
-	cd craftinginterpreters; dart tool/bin/test.dart chap12_classes --interpreter ../lox
+	cd craftinginterpreters; dart tool/bin/test.dart chap13_inheritance --interpreter ../lox
 	cd craftinginterpreters; git checkout -f

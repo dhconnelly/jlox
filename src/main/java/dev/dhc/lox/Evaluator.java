@@ -21,6 +21,7 @@ import dev.dhc.lox.AstNode.ReturnStmt;
 import dev.dhc.lox.AstNode.SetExpr;
 import dev.dhc.lox.AstNode.Stmt;
 import dev.dhc.lox.AstNode.StrExpr;
+import dev.dhc.lox.AstNode.SuperExpr;
 import dev.dhc.lox.AstNode.ThisExpr;
 import dev.dhc.lox.AstNode.UnaryExpr;
 import dev.dhc.lox.AstNode.UnaryOp;
@@ -161,15 +162,22 @@ public class Evaluator {
       }
       case ReturnStmt(_, Expr result) -> throw new Return(evaluate(result));
       case ClassDecl(_, Token className, Optional<VarExpr> superclassName, List<FunDecl> methodDecls) -> {
-        var superclass = superclassName.map(this::evaluate);
-        if (superclass.map(sc -> !(sc instanceof LoxClass)).orElse(false)) {
+        var superclassE = superclassName.map(this::evaluate);
+        if (superclassE.map(sc -> !(sc instanceof LoxClass)).orElse(false)) {
           throw error(className, "Superclass must be a class.");
         }
+        var superclass = superclassE.map(sc -> (LoxClass) sc);
         env.define(className.cargo(), null);
+        var prev = env;
+        superclass.ifPresent(sc -> {
+          this.env = new Environment(prev);
+          this.env.define("super", sc);
+        });
         var methods = methodDecls.stream()
             .map(methodDecl -> methodFunction(env, methodDecl))
             .collect(Collectors.toMap(LoxFunction::name, id -> id));
-        var klass = new LoxClass(className.cargo(), superclass.map(sc -> (LoxClass) sc), methods);
+        var klass = new LoxClass(className.cargo(), superclass, methods);
+        superclass.ifPresent(_ -> this.env = prev);
         env.assign(className.cargo(), klass);
       }
     }
@@ -263,6 +271,15 @@ public class Evaluator {
         throw error(tok, "Only instances have fields.");
       }
       case ThisExpr(Token tok, int depth) -> lookup(tok, depth, "this");
+      case SuperExpr(Token tok, Token methodName, int depth) -> {
+        var superclass = (LoxClass) lookup(tok, depth, "super");
+        var instance = (LoxInstance) lookup(tok, depth-1, "this");
+        var name = methodName.cargo();
+        var method = superclass.findMethod(name);
+        yield method
+            .orElseThrow(() -> error(tok, String.format("Undefined property '%s'.", name)))
+            .bind(instance);
+      }
     };
   }
 }
