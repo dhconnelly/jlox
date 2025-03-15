@@ -39,5 +39,5 @@ there is a wrapper for the cli:
 during development:
 
     make test       # build the project and run integration tests
-    make build ci   # build the project and run the test suite from the book repository
-    make build      # build an executable jar at target/lox.jar
+    make suite      # run the test suite from the book repository
+    make package    # build an executable jar at target/lox.jar
