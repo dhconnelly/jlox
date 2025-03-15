@@ -387,7 +387,7 @@ dev.dhc.lox.IntegrationTest.testTokenize[inputs/tokenize/scanner_errors.lox]=[
       "EOF  null"
     ],
     "errLines": [
-      "[line 1] Error: Unexpected character.",
+      "[line 1] Error: Unexpected character: #",
       "[line 3] Error: Unterminated string."
     ]
   }

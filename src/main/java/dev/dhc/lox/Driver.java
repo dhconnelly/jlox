@@ -82,10 +82,10 @@ public class Driver {
 
       case Command.Run(var path) -> {
         final var program = parseFile(path).program();
+        final var resolved = Resolver.resolve(program);
         final var evaluator = new Evaluator(out);
-        final var resolver = new Resolver();
-        for (var stmt : program.stmts()) {
-          evaluator.execute(resolver.resolve(stmt));
+        for (var stmt : resolved.stmts()) {
+          evaluator.execute(stmt);
         }
         yield Status.SUCCESS;
       }

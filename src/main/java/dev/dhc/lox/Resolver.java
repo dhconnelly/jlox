@@ -54,8 +54,9 @@ public class Resolver {
   }
   private ClassType currentClass = ClassType.NONE;
 
-  public Program resolve(Program program) {
-    return new Program(program.stmts().stream().map(this::resolve).toList());
+  public static Program resolve(Program program) {
+    final var r = new Resolver();
+    return new Program(program.stmts().stream().map(r::resolve).toList());
   }
 
   private void beginScope() {
