@@ -199,7 +199,7 @@ public class Scanner {
             eatWhile(this::isAlphaNumeric);
             emit(resolveType(current.toString()));
           } else {
-            error("Unexpected character.");
+            error(String.format("Unexpected character: %c", c));
           }
         }
       }
